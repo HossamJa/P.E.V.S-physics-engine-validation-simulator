@@ -1,0 +1,6 @@
+fpvenv/
+pycache/
+.vscode
+*.db
+*.exe
+Documents/
