@@ -1,5 +1,6 @@
 fpvenv/
-pycache/
+__pycache__/
+.__pycache__/
 .vscode
 *.db
 *.exe
