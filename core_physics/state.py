@@ -10,8 +10,12 @@ class State:
         mass,            # scalar
         energy,          # scalar
         time,            # scalar
-        frame,
-        can_exchange_momentum=None
+        frame="inertial",
+
+        # Momentum exchange permissions
+        can_exchange_mass=False,
+        can_exchange_radiation=False,
+        can_exchange_fields=False,
     ):
         # Kinematics:
         self.position = position
@@ -22,9 +26,9 @@ class State:
         # Resources"
         self.mass = mass
         self.energy = energy
-        # Environment:
 
-        # What exchanges are physically allowed
-        self.can_exchange_momentum = can_exchange_momentum
-
+        # Environment permissions
+        self.can_exchange_mass = can_exchange_mass
+        self.can_exchange_radiation = can_exchange_radiation
+        self.can_exchange_fields = can_exchange_fields
 

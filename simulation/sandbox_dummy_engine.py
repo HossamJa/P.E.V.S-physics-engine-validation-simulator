@@ -8,9 +8,7 @@ state = State(
     velocity=[1, 0, 0],
     mass=10,
     energy=100,
-    time=0,
-    frame="inertial",
-    can_exchange_momentum=False
+    time=0,  
 )
 
 engine = DummyEngine()

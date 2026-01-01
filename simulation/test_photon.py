@@ -8,8 +8,7 @@ state = State(
     mass=1000,
     energy=1e9,      # large energy store
     time=0,
-    frame="inertial",
-    can_exchange_momentum=True
+    can_exchange_radiation=True
 )
 
 engine = PhotonEngine(power=1e6)  # 1 MW
