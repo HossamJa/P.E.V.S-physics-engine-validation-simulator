@@ -1,38 +1,31 @@
-from core_physics.state import State
-from core_physics.conservation import Conservation
+from core_physics.simulator import Simulator
 from core_physics.engines.claimed import DummyEngine
+from core_physics.state import State
+from .recorder import Recorder
+from core_physics.environment import Environment 
 
-# Initial state
 state = State(
-    position=[0, 0, 0],
-    velocity=[1, 0, 0],
+    position=[0,0,0],
+    velocity=[0,0,0],
     mass=10,
     energy=100,
-    time=0,  
+    time=0,
+    can_exchange_fields=True   # <-- REQUIRED for gravity
 )
 
+
 engine = DummyEngine()
-conservation = Conservation()
+recorder = Recorder()
+environment = Environment(gravity=[0, -9.81, 0])
 
-dt = 1.0
+sim = Simulator(
+    state=state, 
+    engine=engine,
+    environment=environment,   
+    dt=1,
+    recorder=recorder,
+)
+result = sim.step(10)
 
-for step in range(10):
-    effect = engine.step(state, None, dt)
-
-    verdict = conservation.judge(
-        state,
-        effect.delta_p,
-        effect.delta_e,
-        effect.delta_m
-    )
-
-    if verdict["valid"] is False:
-        print("❌ Conservation rejected effect")
-        break
-
-    # Apply effect manually (V1 — no automation yet)
-    # Nothing should change
-    state.time += dt
-
-print("Final state:")
-print(state.position, state.velocity, state.mass, state.energy)
+print(result)
+print(recorder.records)

@@ -10,8 +10,10 @@ class ReactionEngine(BaseEngine):
         self.m_dot = mass_flow_rate     # kg/s
 
     def step(self, state, dt):
-        dm = self.m_dot * dt            # mass expelled
-        dp = dm * self.ve               # exhaust momentum
+        dm = self.m_dot * dt          # mass expelled
+        
+        direction = [1.0, 0.0, 0.0]  # thrust along +x
+        dp = [dm * self.ve * d for d in direction]   # exhaust momentum as vector [x,y,z]
         
         # Assumes ideal conversion; efficiency modeled in V2
         de = 0.5 * dm * self.ve**2      # kinetic energy of exhaust

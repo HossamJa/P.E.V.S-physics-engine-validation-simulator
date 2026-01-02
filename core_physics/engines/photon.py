@@ -6,7 +6,7 @@ class PhotonEngine(BaseEngine):
     A photon engine (a.k.a. photon rocket) works by emitting radiation.
     Core physics (non-negotiable): p = E/c
     Where:
-        p = momentum carried by photons
+        p = momentum carried by photons as vector [x, y, z]
         E = emitted energy
         c = speed of light
         
@@ -22,8 +22,11 @@ class PhotonEngine(BaseEngine):
         # Energy emitted this timestep
         dE = self.power * dt
 
+        dp_mag = dE / C
+        direction = [1.0, 0.0, 0.0]
+
         # Momentum carried by photons
-        dp = dE / C
+        dp = [dp_mag * d for d in direction]
 
         return EngineEffect(
             delta_p=dp,     # vehicle gains momentum

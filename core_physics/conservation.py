@@ -1,3 +1,7 @@
+# Utility function
+def is_zero_vector(v, eps=1e-9):
+    return all(abs(x) < eps for x in v)
+
 class Conservation:
 
     def judge(self, state, delta_p, delta_e, delta_m):
@@ -6,7 +10,8 @@ class Conservation:
         # ---------- Energy ----------
         energy_required = abs(delta_e)
         energy_available = state.energy
-        energy_residual = energy_required - energy_available
+        # Clamp energy residual to zero for reporting:
+        energy_residual =  max(0.0, energy_required - energy_available)
 
         energy_ok = energy_residual <= 0
         explanation["energy"] = {
@@ -34,7 +39,7 @@ class Conservation:
                 }
 
         # ---------- Momentum ----------
-        if delta_p == 0:
+        if is_zero_vector(delta_p):
             momentum_ok = True
             momentum_residual = [0.0, 0.0, 0.0]
             explanation["momentum"] = {"valid": True}
@@ -53,15 +58,16 @@ class Conservation:
             elif state.can_exchange_fields:
                 momentum_ok = True
                 momentum_residual = [0.0, 0.0, 0.0]
-                explanation["momentum"] = {"valid": True, "sink": "field"}
+                explanation["momentum"] = {"valid": True, "sink": "external_gravitational_field"}
 
             else:
                 momentum_ok = False
-                momentum_residual = delta_p
+                momentum_residual = delta_p.copy()
                 explanation["momentum"] = {
                     "valid": False,
                     "explain": "No permitted momentum exchange mechanism"
                 }
+
 
         # ---------- Final verdict ----------
         valid = energy_ok and mass_ok and momentum_ok

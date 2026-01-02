@@ -1,6 +1,8 @@
 from core_physics.state import State
 from core_physics.engines.photon import PhotonEngine
 from core_physics.simulator import Simulator
+from core_physics.environment import Environment 
+from .recorder import Recorder
 
 state = State(
     position=[0, 0, 0],
@@ -11,12 +13,16 @@ state = State(
     can_exchange_radiation=True
 )
 
+environment = Environment(gravity=[0, -9.81, 0])
 engine = PhotonEngine(power=1e6)  # 1 MW
 
+recorder = Recorder()
 sim = Simulator(
-    state=state,
+    state=state, 
     engine=engine,
-    dt=1
+    environment=environment, 
+    dt=1,
+    recorder=recorder
 )
 
 result = sim.step(10)

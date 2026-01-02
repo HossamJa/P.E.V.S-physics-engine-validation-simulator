@@ -45,9 +45,15 @@ class State:
     @property
     def momentum(self):
         return [
-            self.mass * self.velocity[0],
-            self.mass * self.velocity[1],
-            self.mass * self.velocity[2],
+            self.mass * self.velocity[i]
+            for i in range(3)
+        ]
+ 
+    @property
+    def acceleration(self):
+        return [
+            self.last_delta_p[i] / (self.mass * self.last_dt)
+            for i in range(3)
         ]
 
     @property

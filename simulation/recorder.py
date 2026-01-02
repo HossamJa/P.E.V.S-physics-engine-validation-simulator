@@ -10,7 +10,9 @@ class Recorder:
     def record(
         self,
         state,
-        effect,
+        engine_effect,
+        env_effect,
+        total_effect,
         verdict,
         dt,
         step_index
@@ -22,24 +24,34 @@ class Recorder:
 
                     "position": state.position.copy(),
                     "velocity": state.velocity.copy(),
-                    "momentum": state.momentum,
+                    "momentum": state.momentum.copy(),
                     "kinetic_energy": state.kinetic_energy,
 
                     "mass": state.mass,
                     "energy": state.energy,
 
                     "engine_effect": {
-                        "delta_p": effect.delta_p,
-                        "delta_E": effect.delta_e,
-                        "delta_m": effect.delta_m,
+                        "delta_p": engine_effect.delta_p,
+                        "delta_E": engine_effect.delta_e,
+                        "delta_m": engine_effect.delta_m,
+                    },
+                    "environment_effect": {
+                        "delta_p": env_effect.delta_p,
+                        "delta_E": env_effect.delta_e,
+                        "delta_m": env_effect.delta_m,
+                    },
+                    "total_effect": {
+                        "delta_p": total_effect.delta_p,
+                        "delta_E": total_effect.delta_e,
+                        "delta_m": total_effect.delta_m,
                     },
 
                     "conservation": verdict,
                 })
 
     def analyze_drift(self):
-        energy_drift = sum(r["conservation"]["energy_residual"] for r in records)
-        mass_drift = sum(r["conservation"]["mass_residual"] for r in records)
+        energy_drift = sum(r["conservation"]["energy_residual"] for r in self.records)
+        mass_drift = sum(r["conservation"]["mass_residual"] for r in self.records)
 
         momentum_drift = [0, 0, 0]
         for r in self.records:
