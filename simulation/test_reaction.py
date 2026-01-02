@@ -26,6 +26,4 @@ sim = Simulator(
 )
 result = sim.step(10)
 
-print("Final velocity:", recorder.last()["velocity"])
-print("Energy history:", [h["energy"] for h in recorder.history])
-print("Momentum history:", [h["momentum"] for h in recorder.history])
+print(recorder.records)

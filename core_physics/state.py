@@ -12,6 +12,10 @@ class State:
         time,            # scalar
         frame="inertial",
 
+        # Optional bookkeeping
+        total_energy_consumed=0.0,
+        total_mass_lost=0.0,
+
         # Momentum exchange permissions
         can_exchange_mass=False,
         can_exchange_radiation=False,
@@ -23,6 +27,10 @@ class State:
         self.time = time
         self.frame = frame
 
+        # Bookkeeping:
+        self.total_energy_consumed = total_energy_consumed
+        self.total_mass_lost = total_mass_lost
+
         # Resources"
         self.mass = mass
         self.energy = energy
@@ -32,3 +40,17 @@ class State:
         self.can_exchange_radiation = can_exchange_radiation
         self.can_exchange_fields = can_exchange_fields
 
+ # ---------- Derived properties (NEVER stored) ----------
+
+    @property
+    def momentum(self):
+        return [
+            self.mass * self.velocity[0],
+            self.mass * self.velocity[1],
+            self.mass * self.velocity[2],
+        ]
+
+    @property
+    def kinetic_energy(self):
+        v2 = sum(v * v for v in self.velocity)
+        return 0.5 * self.mass * v2

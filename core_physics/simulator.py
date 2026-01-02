@@ -20,7 +20,7 @@ class Simulator:
             )
 
             if self.recorder:
-                self.recorder.record(self.state, effect, verdict)
+                self.recorder.record(self.state, effect, verdict, self.dt, step)
 
             if verdict["valid"] is False:
                 return {

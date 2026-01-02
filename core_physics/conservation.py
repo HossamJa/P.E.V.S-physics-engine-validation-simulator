@@ -3,63 +3,76 @@ class Conservation:
     def judge(self, state, delta_p, delta_e, delta_m):
         explanation = {}
 
-        # 1. Momentum balance check
-        m_check = self.momentum_balance_check(state, delta_p, delta_m)
-        if not m_check["valid"]:
-            return {"valid": False, "explain": m_check}
+        # ---------- Energy ----------
+        energy_required = abs(delta_e)
+        energy_available = state.energy
+        energy_residual = energy_required - energy_available
 
-        # 2. Energy availability
-        energy = self.energy_availability_check(state, delta_e)
-        explanation["energy"] = energy
-        if not energy["balanced"]:
-            return {"valid": False, "explain": explanation}
-
-        # 3. Mass flow validity
-        mass = self.mass_flow_validity_check(state, delta_p, delta_m)
-        explanation["mass"] = mass
-        if not mass["valid"]:
-            return {"valid": False, "explain": explanation}
-
-        # If all checks pass
-        return {"valid": True, "explain": explanation}
-
-    def energy_availability_check(self, state, delta_e):
-        return {
-            "balanced": abs(delta_e) <= state.energy,
-            "required": abs(delta_e),
-            "available": state.energy
+        energy_ok = energy_residual <= 0
+        explanation["energy"] = {
+            "balanced": energy_ok,
+            "required": energy_required,
+            "available": energy_available,
         }
 
-    def mass_flow_validity_check(self, state, delta_p, delta_m):
-        # No mass change claimed → OK unless mass exchange is required
+        # ---------- Mass ----------
         if delta_m == 0:
-            return {"valid": True}
+            mass_ok = True
+            mass_residual = 0.0
+            explanation["mass"] = {"valid": True}
+        else:
+            if state.can_exchange_mass:
+                mass_ok = True
+                mass_residual = 0.0
+                explanation["mass"] = {"valid": True}
+            else:
+                mass_ok = False
+                mass_residual = abs(delta_m)
+                explanation["mass"] = {
+                    "valid": False,
+                    "explain": "Mass exchange not permitted"
+                }
 
-        # Mass change claimed but not allowed
-        if not state.can_exchange_mass:
-            return {
-                "valid": False,
-                "explain": "Mass exchange not permitted by environment"
-            }
-
-        return {"valid": True}
-
-
-    def momentum_balance_check(self, state, delta_p, delta_m):
+        # ---------- Momentum ----------
         if delta_p == 0:
-            return {"valid": True}
+            momentum_ok = True
+            momentum_residual = [0.0, 0.0, 0.0]
+            explanation["momentum"] = {"valid": True}
 
-        if delta_m != 0 and state.can_exchange_mass:
-            return {"valid": True, "sink": "mass"}
+        else:
+            if delta_m != 0 and state.can_exchange_mass:
+                momentum_ok = True
+                momentum_residual = [0.0, 0.0, 0.0]
+                explanation["momentum"] = {"valid": True, "sink": "mass"}
 
-        if state.can_exchange_radiation:
-            return {"valid": True, "sink": "radiation"}
+            elif state.can_exchange_radiation:
+                momentum_ok = True
+                momentum_residual = [0.0, 0.0, 0.0]
+                explanation["momentum"] = {"valid": True, "sink": "radiation"}
 
-        if state.can_exchange_fields:
-            return {"valid": True, "sink": "field"}
+            elif state.can_exchange_fields:
+                momentum_ok = True
+                momentum_residual = [0.0, 0.0, 0.0]
+                explanation["momentum"] = {"valid": True, "sink": "field"}
+
+            else:
+                momentum_ok = False
+                momentum_residual = delta_p
+                explanation["momentum"] = {
+                    "valid": False,
+                    "explain": "No permitted momentum exchange mechanism"
+                }
+
+        # ---------- Final verdict ----------
+        valid = energy_ok and mass_ok and momentum_ok
 
         return {
-            "valid": False,
-            "explain": "No permitted momentum exchange mechanism"
-        }
+            "valid": valid,
 
+            # Residuals (ALWAYS PRESENT)
+            "energy_residual": energy_residual,
+            "mass_residual": mass_residual,
+            "momentum_residual": momentum_residual,
+
+            "explain": explanation
+        }

@@ -264,3 +264,73 @@ That doesn’t mean:
   But it **must**:
 * Reveal a hidden momentum sink
 * Or redefine what counts as “external” (vacuum ≠ nothing)
+
+# Progress:
+
+## ✅ Current Status — Honest Assessment
+
+### What I have **fully completed**
+
+I have **successfully and correctly implemented V1.5**.
+
+Let’s map this explicitly to the checklist and original vision.
+
+### ✔ V1 Core (100% DONE)
+
+* Immutable physics authority (`State`)
+* Engine interface (proposal-only)
+* Conservation as judge (not updater)
+* Simulator loop with single source of truth
+* Reaction engine passes
+* Photon / reactionless engines fail correctly
+
+This alone is already solid.
+
+---
+
+### ✔ V1.5 — Numerical Credibility (DONE, not partial)
+
+I now have:
+
+| Requirement                                | Status |
+| ------------------------------------------ | ------ |
+| Derived state (momentum, KE, acceleration) | ✅      |
+| Per-step recording                         | ✅      |
+| Conservation residuals (E, p, m)           | ✅      |
+| Drift detection / analysis                 | ✅      |
+| Simulator accepts enriched verdicts        | ✅      |
+| Engines judged quantitatively              | ✅      |
+
+That means:
+
+> The lab is now **numerically honest**.
+
+This is the line that separates “toy simulators” from **engineering-grade code**.
+
+I can **prove** that something failed, not just say it failed.
+
+---
+
+## 🧭 Where I Am on the Original Roadmap
+
+Let’s place it precisely:
+
+```
+V1 Core        ██████████████ 100%
+V1.5 Numeric   ██████████████ 100%
+V2 Physics     ░░░░░░░░░░░░░░ 0%
+Noron Layer    ░░░░░░░░░░░░░░ 0%
+```
+
+And Iam **at a clean fork point**.
+
+No technical debt.
+No half-finished layer.
+No broken abstractions.
+
+This is *exactly* when I move to V2.
+
+---
+
+
+
