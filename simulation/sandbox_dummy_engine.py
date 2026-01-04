@@ -17,15 +17,15 @@ state = State(
 engine = DummyEngine()
 recorder = Recorder()
 environment = Environment(gravity=[0, -9.81, 0])
+steps = 1000
 
 sim = Simulator(
     state=state, 
     engine=engine,
-    environment=environment,   
-    dt=1,
+    environment=environment,
     recorder=recorder,
 )
-result = sim.step(10)
+result = sim.step(steps)
 
 print(result)
 print(recorder.records)

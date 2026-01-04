@@ -1,75 +1,116 @@
-# Utility function
+# Utility functions
 def is_zero_vector(v, eps=1e-9):
     return all(abs(x) < eps for x in v)
 
-class Conservation:
+def vadd(a, b):
+    return [a[i] + b[i] for i in range(3)]
 
-    def judge(self, state, delta_p, delta_e, delta_m):
+class Conservation:
+    """
+    Judges whether a set of proposed effects respects
+    conservation of energy, mass, and momentum.
+    """
+
+    def judge(self, state, effects, environment):
         explanation = {}
 
-        # ---------- Energy ----------
-        energy_required = abs(delta_e)
-        energy_available = state.energy
-        # Clamp energy residual to zero for reporting:
-        energy_residual =  max(0.0, energy_required - energy_available)
+        # Accumulators
+        ship_dp = [0.0, 0.0, 0.0]
+        ship_de = 0.0
+        ship_dm = 0.0
 
-        energy_ok = energy_residual <= 0
+        exhaust_dp = [0.0, 0.0, 0.0]
+        field_dp = [0.0, 0.0, 0.0]
+
+        # --- Collect effects ---
+        for effect in effects:
+            if effect.channel == "ship":
+                ship_dp = vadd(ship_dp, effect.delta_p)
+                ship_de += effect.delta_e
+                ship_dm += effect.delta_m
+
+            elif effect.channel == "exhaust":
+                exhaust_dp = vadd(exhaust_dp, effect.delta_p)
+
+            elif effect.channel == "field":
+                field_dp = vadd(field_dp, effect.delta_p)
+
+        # ======================
+        # Energy conservation
+        # ======================
+
+        # Only ship energy draws from stored energy
+        energy_required = -min(0.0, ship_de)
+
+        if energy_required <= state.energy:
+            energy_ok = True
+            energy_residual = 0.0
+        else:
+            energy_ok = False
+            energy_residual = energy_required - state.energy
+
         explanation["energy"] = {
             "balanced": energy_ok,
             "required": energy_required,
-            "available": energy_available,
+            "available": state.energy,
         }
 
-        # ---------- Mass ----------
-        if delta_m == 0:
+        # ======================
+        # Mass conservation
+        # ======================
+
+        if ship_dm == 0.0:
             mass_ok = True
             mass_residual = 0.0
-            explanation["mass"] = {"valid": True}
         else:
             if state.can_exchange_mass:
                 mass_ok = True
                 mass_residual = 0.0
-                explanation["mass"] = {"valid": True}
             else:
                 mass_ok = False
-                mass_residual = abs(delta_m)
-                explanation["mass"] = {
-                    "valid": False,
-                    "explain": "Mass exchange not permitted"
-                }
+                mass_residual = abs(ship_dm)
 
-        # ---------- Momentum ----------
-        if is_zero_vector(delta_p):
+        explanation["mass"] = {
+            "valid": mass_ok,
+            "delta_m": ship_dm,
+        }
+
+        # ======================
+        # Momentum conservation
+        # ======================
+
+        # Internal momentum (ship + exhaust)
+        internal_dp = vadd(ship_dp, exhaust_dp)
+
+        if is_zero_vector(internal_dp):
+            # Ship momentum fully balanced by exhaust
             momentum_ok = True
             momentum_residual = [0.0, 0.0, 0.0]
-            explanation["momentum"] = {"valid": True}
+            explanation["momentum"] = {
+                "valid": True,
+                "balanced_against": "exhaust",
+            }
 
         else:
-            if delta_m != 0 and state.can_exchange_mass:
+            if state.can_exchange_fields and not is_zero_vector(field_dp):
+                # Momentum exchanged with external field (gravity, EM, spacetime)
                 momentum_ok = True
                 momentum_residual = [0.0, 0.0, 0.0]
-                explanation["momentum"] = {"valid": True, "sink": "mass"}
-
-            elif state.can_exchange_radiation:
-                momentum_ok = True
-                momentum_residual = [0.0, 0.0, 0.0]
-                explanation["momentum"] = {"valid": True, "sink": "radiation"}
-
-            elif state.can_exchange_fields:
-                momentum_ok = True
-                momentum_residual = [0.0, 0.0, 0.0]
-                explanation["momentum"] = {"valid": True, "sink": "external_gravitational_field"}
-
+                explanation["momentum"] = {
+                    "valid": True,
+                    "balanced_against": "external_field",
+                }
             else:
+                # Reactionless momentum creation
                 momentum_ok = False
-                momentum_residual = delta_p.copy()
+                momentum_residual = internal_dp.copy()
                 explanation["momentum"] = {
                     "valid": False,
-                    "explain": "No permitted momentum exchange mechanism"
+                    "residual": internal_dp,
+                    "explain": "Unbalanced momentum without exhaust or external field",
                 }
 
-
-        # ---------- Final verdict ----------
+        # Final verdict
         valid = energy_ok and mass_ok and momentum_ok
 
         return {
@@ -80,5 +121,5 @@ class Conservation:
             "mass_residual": mass_residual,
             "momentum_residual": momentum_residual,
 
-            "explain": explanation
+            "explain": explanation,
         }

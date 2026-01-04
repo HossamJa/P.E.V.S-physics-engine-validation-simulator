@@ -2,37 +2,29 @@ from .engines.base import EngineEffect
 
 class Environment:
     """
-    Environment applies background physics.
-    It does NOT decide validity — Conservation does.
+    Environment applies external field effects.
+    Conservation decides validity.
     """
 
-    def __init__(
-        self,
-        gravity=None,          # vector [gx, gy, gz] in m/s²
-        allow_spacetime=True,  # allows momentum exchange with spacetime
-    ):
-        self.gravity = gravity
-        self.allow_spacetime = allow_spacetime
+    def __init__(self, gravity):
+        self.gravity = gravity  # [gx, gy, gz]
 
-    def apply(self, state, dt):
-        """
-        Returns an EngineEffect representing environmental influence.
-        """
-        if self.gravity is None:
-            return EngineEffect()
-        
-        delta_p = [state.mass * self.gravity[i] * dt for i in range(3)]
-        delta_e = 0.0
-        delta_m = 0.0
+    def apply_field(self, state, dt):
+        if not state.can_exchange_fields:
+            return []
 
-        # Gravity = momentum exchange with spacetime
-        if self.gravity:
-            for i in range(3):
-                dp = state.mass * self.gravity[i] * dt
-                delta_p[i] += dp
+        m = state.mass
+        g = self.gravity
 
-        return EngineEffect(
-            delta_p=delta_p,
-            delta_e=delta_e,
-            delta_m=delta_m
-        )
+        # Δp = F dt = m g dt
+        delta_p = [m * g[i] * dt for i in range(3)]
+
+        return [
+            EngineEffect(
+                delta_p=delta_p,
+                delta_e=0.0,
+                delta_m=0.0,
+                channel="field",
+                source="gravity"
+            )
+        ]

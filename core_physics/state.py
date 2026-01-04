@@ -23,9 +23,10 @@ class State:
     ):
         # Kinematics:
         self.position = position
-        self.velocity= velocity
         self.time = time
         self.frame = frame
+
+        self.momentum = [mass * velocity[i] for i in range(3)]
 
         # Bookkeeping:
         self.total_energy_consumed = total_energy_consumed
@@ -43,16 +44,9 @@ class State:
  # ---------- Derived properties (NEVER stored) ----------
 
     @property
-    def momentum(self):
+    def velocity(self):
         return [
-            self.mass * self.velocity[i]
-            for i in range(3)
-        ]
- 
-    @property
-    def acceleration(self):
-        return [
-            self.last_delta_p[i] / (self.mass * self.last_dt)
+            self.momentum[i] / self.mass
             for i in range(3)
         ]
 
@@ -60,3 +54,10 @@ class State:
     def kinetic_energy(self):
         v2 = sum(v * v for v in self.velocity)
         return 0.5 * self.mass * v2
+
+    # Add derived potential energy without storing it
+    @property
+    def potential_energy(self):
+        # Simple uniform gravity along Y
+        # Environment will define g
+        return None  # computed by Environment

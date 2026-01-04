@@ -10,7 +10,8 @@ state = State(
     mass=100,
     energy=1e8,
     time=0,
-    can_exchange_mass = True
+    can_exchange_mass = True,
+    can_exchange_fields = True
 )
 
 engine = ReactionEngine(
@@ -24,10 +25,11 @@ recorder = Recorder()
 sim = Simulator(
     state=state, 
     engine=engine,
-    environment=environment, 
-    dt=1,
+    environment=environment,
     recorder=recorder
 )
 result = sim.step(10)
+
+print(result)
 
 print(recorder.records)

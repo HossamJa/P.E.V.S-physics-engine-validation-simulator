@@ -28,8 +28,11 @@ class PhotonEngine(BaseEngine):
         # Momentum carried by photons
         dp = [dp_mag * d for d in direction]
 
-        return EngineEffect(
-            delta_p=dp,     # vehicle gains momentum
-            delta_e=-dE,    # energy spent
-            delta_m=0       # no mass loss
-        )
+        return [
+            EngineEffect(
+                delta_p=dp,     # vehicle gains momentum
+                delta_e=-dE,    # energy spent
+                delta_m=0,       # no mass loss
+                source = "engine"
+            )
+        ]

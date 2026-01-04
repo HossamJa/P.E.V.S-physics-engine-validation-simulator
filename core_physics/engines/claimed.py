@@ -7,8 +7,12 @@ class DummyEngine(BaseEngine):
     """
 
     def step(self, state, dt):
-        return EngineEffect(
-            delta_p=[0.0, 0.0, 0.0],
-            delta_e=0,
-            delta_m=0
-        )
+        return [
+            EngineEffect(
+                delta_p=[0.0, 0.0, 0.0],
+                delta_e=0.0,
+                delta_m=0.0,
+                channel="ship",
+                source="engine"
+            )
+        ]

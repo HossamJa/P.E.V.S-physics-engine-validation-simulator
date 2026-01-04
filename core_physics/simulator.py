@@ -1,12 +1,7 @@
 from .conservation import Conservation
-from .engines.base import EngineEffect
-
-# Utility Function
-def vadd(a, b):
-    return [a[i] + b[i] for i in range(3)]
 
 class Simulator:
-    def __init__(self, state, engine, environment, dt, recorder=None):
+    def __init__(self, state, engine, environment, dt=0.01, recorder=None):
         self.state = state
         self.engine = engine
         self.environment = environment
@@ -14,44 +9,28 @@ class Simulator:
         self.conservation = Conservation()
         self.recorder = recorder
 
-    def step(self, steps):
+    def step(self, steps=1000):
         for step in range(steps):
 
-            # 1. Engine proposes
-            engine_effect = self.engine.step(self.state, self.dt)
+            # 1. Engine proposes effects (list)
+            engine_effects = self.engine.step(self.state, self.dt)
+            if not isinstance(engine_effects, list):
+                engine_effects = [engine_effects]
 
-            # 2. Environment applies background physics
-            env_effect = self.environment.apply(self.state, self.dt)
+            # 2. Environment applies field effects (list)
+            field_effects = self.environment.apply_field(self.state, self.dt)
+            if not isinstance(field_effects, list):
+                field_effects = [field_effects]
 
-            # 3. Combine effects
-            total_effect = EngineEffect(
-                delta_p=vadd(
-                        engine_effect.delta_p,
-                        env_effect.delta_p
-                    ),
-                delta_e=engine_effect.delta_e + env_effect.delta_e,
-                delta_m=engine_effect.delta_m + env_effect.delta_m
-            )
-
+            # 3. Combine all effects
+            all_effects = engine_effects + field_effects
+            
             # 4. Conservation judges combined effect
             verdict = self.conservation.judge(
                 self.state,
-                total_effect.delta_p,
-                total_effect.delta_e,
-                total_effect.delta_m
+                all_effects,
+                self.environment,
             )
-
-            # 5. Recorder observes everything
-            if self.recorder:
-                self.recorder.record(
-                    self.state,
-                    engine_effect,
-                    env_effect,
-                    total_effect,
-                    verdict,
-                    self.dt,
-                    step
-                )
 
             if not verdict["valid"]:
                 return {
@@ -59,23 +38,51 @@ class Simulator:
                     "step": step
                 }
 
-            # 6. Apply approved effect
+            # 5. Extract SHIP-only effects
+            ship_effects = [e for e in all_effects if e.channel in ["ship", "field"]]
             
-            # Apply momentum
-            for i in range(3):
-                self.state.momentum[i] += total_effect.delta_p[i]
-            
-            # Update velocity
-            for i in range(len(self.state.velocity)):
-                self.state.velocity[i] += total_effect.delta_p[i] / self.state.mass
-            
-            # Update position
-            for i in range(len(self.state.position)):
-                self.state.position[i] += self.state.velocity[i] * self.dt
+            # --- Sum ship effects ---
+            ship_dp = [0.0, 0.0, 0.0]
+            ship_de = 0.0
+            ship_dm = 0.0
 
-            self.state.mass += total_effect.delta_m
-            self.state.energy += total_effect.delta_e
+            for e in ship_effects:
+                for i in range(3):
+                    ship_dp[i] += e.delta_p[i]
+                ship_de += e.delta_e
+                ship_dm += e.delta_m
+            # 6. Apply approved effect (SYMPLECTIC)
+
+            # --- Apply mass & energy FIRST ---
+            self.state.mass += ship_dm
+            self.state.energy += ship_de
+
+            # --- Apply TOTAL impulse directly ---
+            for i in range(3):
+                self.state.momentum[i] += ship_dp[i]
+
+            # --- Drift using derived velocity ---
+            v = [
+                self.state.momentum[i] / self.state.mass
+                for i in range(3)
+            ]
+
+            for i in range(3):
+                self.state.position[i] += v[i] * self.dt
+
             self.state.time += self.dt
+
+            # 7. Recorder observes everything
+            if self.recorder:
+                self.recorder.record(
+                    self.state,
+                    engine_effects,
+                    field_effects,
+                    self.environment,
+                    verdict,
+                    self.dt,
+                    step
+                )
 
         return {
             "judge": {"valid": True},
