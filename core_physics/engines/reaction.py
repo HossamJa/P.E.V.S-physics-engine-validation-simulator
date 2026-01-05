@@ -19,7 +19,7 @@ class ReactionEngine(BaseEngine):
 
         # --- Vector momentum ---
         dp = [dp_mag * d for d in self.direction]
-        print("REACTION ENGINE dp:", dp)
+
         # --- Energy spent by ship ---
         de = 0.5 * dm * self.ve ** 2
 

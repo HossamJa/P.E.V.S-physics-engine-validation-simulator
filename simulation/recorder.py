@@ -36,9 +36,9 @@ class Recorder:
         # ---------- Mechanical energy ----------
         kinetic_energy = state.kinetic_energy
 
-        g = environment.gravity
+        g = environment.G
         y = state.position[1]
-        potential_energy = -state.mass * g[1] * y
+        potential_energy = -state.mass * g * y
 
         total_mechanical_energy = kinetic_energy + potential_energy
 

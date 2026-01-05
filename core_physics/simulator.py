@@ -30,6 +30,7 @@ class Simulator:
                 self.state,
                 all_effects,
                 self.environment,
+                dt=self.dt
             )
 
             if not verdict["valid"]:

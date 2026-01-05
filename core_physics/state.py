@@ -10,6 +10,7 @@ class State:
         mass,            # scalar
         energy,          # scalar
         time,            # scalar
+        environment,        
         frame="inertial",
 
         # Optional bookkeeping
@@ -41,6 +42,7 @@ class State:
         self.can_exchange_radiation = can_exchange_radiation
         self.can_exchange_fields = can_exchange_fields
 
+        self.environment = environment
  # ---------- Derived properties (NEVER stored) ----------
 
     @property
@@ -58,6 +60,6 @@ class State:
     # Add derived potential energy without storing it
     @property
     def potential_energy(self):
-        # Simple uniform gravity along Y
-        # Environment will define g
-        return None  # computed by Environment
+        g = self.environment.gravity
+        return self.mass * g[1] * self.position[1]
+
