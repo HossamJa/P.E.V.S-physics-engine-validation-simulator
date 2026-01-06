@@ -32,15 +32,21 @@ class Environment:
         return math.sqrt(dx*dx + dy*dy + dz*dz)
 
     def gravity_direction(self, position):
-        dx = self.gravity_source_position[0] - position[0]
-        dy = self.gravity_source_position[1] - position[1]
-        dz = self.gravity_source_position[2] - position[2]
-
-        r = math.sqrt(dx*dx + dy*dy + dz*dz)
+        v = self.vector_to_gravity_source(position)
+        r = math.sqrt(sum(x*x for x in v))
         if r == 0:
             return [0.0, 0.0, 0.0]
+        return [x / r for x in v]
 
-        return [dx / r, dy / r, dz / r]
+    def vector_to_gravity_source(self, position):
+        """
+        Returns vector pointing FROM object TO gravity source.
+        """
+        return [
+            self.gravity_source_position[0] - position[0],
+            self.gravity_source_position[1] - position[1],
+            self.gravity_source_position[2] - position[2],
+        ]
 
     # -----------------------------------
     # Field application (momentum only)

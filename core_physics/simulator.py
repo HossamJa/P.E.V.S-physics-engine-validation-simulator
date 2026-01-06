@@ -13,7 +13,7 @@ class Simulator:
         for step in range(steps):
 
             # 1. Engine proposes effects (list)
-            engine_effects = self.engine.step(self.state, self.dt)
+            engine_effects = self.engine.step(self.state, self.environment, self.dt)
             if not isinstance(engine_effects, list):
                 engine_effects = [engine_effects]
 

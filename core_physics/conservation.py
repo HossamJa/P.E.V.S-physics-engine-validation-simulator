@@ -114,7 +114,7 @@ class Conservation:
             }
 
         else:
-            if state.can_exchange_fields and not is_zero_vector(field_dp):
+            if state.can_exchange_fields:
                 # Momentum exchanged with external field (gravity, EM, spacetime)
                 momentum_ok = True
                 momentum_residual = [0.0, 0.0, 0.0]
@@ -131,6 +131,7 @@ class Conservation:
                     "residual": internal_dp,
                     "explain": "Unbalanced momentum without exhaust or external field",
                 }
+
         if not is_zero_vector(field_dp):
             # --- FIELD ENERGY CONSERVATION ONLY ---
 
