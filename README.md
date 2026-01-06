@@ -311,26 +311,12 @@ I can **prove** that something failed, not just say it failed.
 
 ---
 
-## 🧭 Where I Am on the Original Roadmap
-
-Let’s place it precisely:
-
-```
-V1 Core        ██████████████ 100%
-V1.5 Numeric   ██████████████ 100%
-V2 Physics     ░░░░░░░░░░░░░░ 0%
-Noron Layer    ░░░░░░░░░░░░░░ 0%
-```
-
-And Iam **at a clean fork point**.
-
-No technical debt.
-No half-finished layer.
-No broken abstractions.
-
-This is *exactly* when I move to V2.
-
----
+Current progress:
+✅ V1 Core — 100% COMPLETE
+✅ V1.5 Numerical Credibility — 100% COMPLETE
+✅ V2.1 Environment as physics — COMPLETE
+✅ V2.2 Field engines (constrained) — COMPLETE
+✅ V2.3 Field energy accountability / frame sanity (core) — COMPLETE
 
 
 
