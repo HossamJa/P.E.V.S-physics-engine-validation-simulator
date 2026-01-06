@@ -21,6 +21,8 @@ class Environment:
 
         self.has_gravity = gravity_mass is not None
 
+        self.field_momentum = [0.0, 0.0, 0.0]
+
     # -----------------------------------
     # Geometry helpers (USED BY CONSERVATION)
     # -----------------------------------
@@ -47,6 +49,11 @@ class Environment:
             self.gravity_source_position[1] - position[1],
             self.gravity_source_position[2] - position[2],
         ]
+    
+    # Environment support field momentum with this helper method
+    def absorb_field_effect(self, effect):
+        for i in range(3):
+            self.field_momentum[i] += effect.delta_p[i]
 
     # -----------------------------------
     # Field application (momentum only)
@@ -73,7 +80,7 @@ class Environment:
         return [
             EngineEffect(
                 delta_p=delta_p,
-                delta_e=0.0,   # ❗ NO ENERGY INJECTION
+                delta_e=0.0,
                 delta_m=0.0,
                 channel="field",
                 source="gravity"
