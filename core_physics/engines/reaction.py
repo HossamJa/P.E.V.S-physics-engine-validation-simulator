@@ -10,7 +10,7 @@ class ReactionEngine(BaseEngine):
         self.m_dot = mass_flow_rate     # kg/s
         self.direction = direction or [1.0, 0.0, 0.0]  # unit vector
 
-    def step(self, state, dt):
+    def step(self, state, environment, dt):
         # --- Mass expelled ---
         dm = self.m_dot * dt            # kg
 

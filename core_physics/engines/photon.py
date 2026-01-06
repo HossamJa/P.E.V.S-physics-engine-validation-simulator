@@ -18,7 +18,7 @@ class PhotonEngine(BaseEngine):
         """
         self.power = power
 
-    def step(self, state, dt):
+    def step(self, state, environment, dt):
         # Energy emitted this timestep
         dE = self.power * dt
 

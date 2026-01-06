@@ -6,7 +6,7 @@ class DummyEngine(BaseEngine):
     Used to validate conservation framework.
     """
 
-    def step(self, state, dt):
+    def step(self, state, environment, dt):
         return [
             EngineEffect(
                 delta_p=[0.0, 0.0, 0.0],
