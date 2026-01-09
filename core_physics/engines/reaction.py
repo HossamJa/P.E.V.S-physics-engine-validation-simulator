@@ -1,4 +1,6 @@
-from .base import BaseEngine, EngineEffect
+from .base import BaseEngine
+from core_physics.effects import Effect
+from core_physics.reports import EngineReport
 
 class ReactionEngine(BaseEngine):
     """
@@ -23,9 +25,9 @@ class ReactionEngine(BaseEngine):
         # --- Energy spent by ship ---
         de = 0.5 * dm * self.ve ** 2
 
-        return [
+        effects = [
             # ---------------- Ship ----------------
-            EngineEffect(
+            Effect(
                 delta_p=dp,              # ship gains +dp
                 delta_m=-dm,             # ship loses mass
                 delta_e=-de,             # ship spends energy
@@ -34,7 +36,7 @@ class ReactionEngine(BaseEngine):
             ),
 
             # --------------- Exhaust --------------
-            EngineEffect(
+            Effect(
                 delta_p=[-x for x in dp],  # exhaust carries −dp
                 delta_m=+dm,               # exhaust gains mass
                 delta_e=+de,               # exhaust carries KE
@@ -42,3 +44,13 @@ class ReactionEngine(BaseEngine):
                 source="reaction_engine"
             )
         ]
+    
+        report = EngineReport(
+            exhaust_momentum=[-x for x in dp],
+            energy_drawn=de,
+            mass_spent=dm,
+            field_work=0.0,
+            active=True
+        )
+
+        return effects, report

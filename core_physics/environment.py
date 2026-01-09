@@ -1,4 +1,5 @@
-from .engines.base import EngineEffect
+from .effects import Effect
+from .reports import EnvironmentReport
 import math
 
 class Environment:
@@ -77,12 +78,20 @@ class Environment:
         # Δp = F * dt * direction
         delta_p = [F * direction[i] * dt for i in range(3)]
 
-        return [
-            EngineEffect(
-                delta_p=delta_p,
-                delta_e=0.0,
-                delta_m=0.0,
-                channel="field",
-                source="gravity"
-            )
-        ]
+        effects = Effect(
+                    delta_p=delta_p,
+                    channel="field",
+                    source="gravity"
+                )
+
+        # ---- ENERGY ACCOUNTING ----
+        work = sum(F * direction[i] * (state.velocity[i] * dt) for i in range(3))
+        
+        report = EnvironmentReport(
+            momentum_exchange=delta_p,
+            energy_exchange=-work,   # environment LOSES energy
+            field_work=work,
+            source="gravity"
+        )
+
+        return effects, report

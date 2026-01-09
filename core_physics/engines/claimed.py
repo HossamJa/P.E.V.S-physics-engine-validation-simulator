@@ -1,4 +1,6 @@
-from .base import BaseEngine, EngineEffect
+from .base import BaseEngine
+from core_physics.effects import Effect
+from core_physics.reports import EngineReport
 
 class DummyEngine(BaseEngine):
     """
@@ -7,8 +9,9 @@ class DummyEngine(BaseEngine):
     """
 
     def step(self, state, environment, dt):
-        return [
-            EngineEffect(
+
+        effect = [
+            Effect(
                 delta_p=[0.0, 0.0, 0.0],
                 delta_e=0.0,
                 delta_m=0.0,
@@ -16,3 +19,11 @@ class DummyEngine(BaseEngine):
                 source="engine"
             )
         ]
+        report =  EngineReport(
+                    exhaust_momentum=[0.0, 0.0, 0.0],
+                    energy_drawn=0.0,
+                    mass_spent=0.0,
+                    field_work=0.0,
+                    active=False
+                )
+        return effect, report

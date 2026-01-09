@@ -8,93 +8,63 @@ class Recorder:
         self.records = []
         self.initial_mechanical_energy = None
 
-    def _sum_effects(self, effects):
-        """Safely aggregate a list of EngineEffect"""
-        dp = [0.0, 0.0, 0.0]
-        de = 0.0
-        dm = 0.0
-
-        for e in effects or []:
-            for i in range(3):
-                dp[i] += e.delta_p[i]
-            de += e.delta_e
-            dm += e.delta_m
-
-        return dp, de, dm
-
-
-    def record(
-        self,
-        state,
-        engine_effects,
-        env_effects,
-        environment,        
-        verdict,
-        dt,
-        step_index
-    ):
-        # ---------- Mechanical energy ----------
-        kinetic_energy = state.kinetic_energy
-
-        g = environment.G
-        y = state.position[1]
-        potential_energy = -state.mass * g * y
-
-        total_mechanical_energy = kinetic_energy + potential_energy
-
-        if self.initial_mechanical_energy is None:
-            self.initial_mechanical_energy = total_mechanical_energy
-
-        mechanical_energy_drift = (
-            total_mechanical_energy - self.initial_mechanical_energy
-        )
-
-        # ---------- Aggregate effects ----------
-        eng_dp, eng_de, eng_dm = self._sum_effects(engine_effects)
-        env_dp, env_de, env_dm = self._sum_effects(env_effects)
-
-        total_dp = [
-            eng_dp[i] + env_dp[i] for i in range(3)
-        ]
-        total_de = eng_de + env_de
-        total_dm = eng_dm + env_dm
-
-        # ---------- Record ----------
-        self.records.append({
-            "step": step_index,
+    # Helper
+    def _snapshot_state(self, state):
+        """Create an immutable snapshot for reasoning"""
+        return {
             "time": state.time,
-            "dt": dt,
-
             "position": state.position.copy(),
             "velocity": state.velocity.copy(),
             "momentum": state.momentum.copy(),
-
             "mass": state.mass,
             "stored_energy": state.energy,
+            "kinetic_energy": state.kinetic_energy,
+        }
 
-            "kinetic_energy": kinetic_energy,
-            "potential_energy": potential_energy,
-            "total_mechanical_energy": total_mechanical_energy,
-            "mechanical_energy_change_due_to_field": mechanical_energy_drift,
+    # ----------------------------------------
+    # Main recorder entry
+    # ----------------------------------------
 
-            "engine_effect": {
-                "delta_p": eng_dp.copy(),
-                "delta_e": eng_de,
-                "delta_m": eng_dm,
-            },
-            "environment_effect": {
-                "delta_p": env_dp.copy(),
-                "delta_e": env_de,
-                "delta_m": env_dm,
-            },
-            "total_effect": {
-                "delta_p": total_dp.copy(),
-                "delta_e": total_de,
-                "delta_m": total_dm,
-            },
+    def record(
+        self,
+        state_before,
+        state_after,
+        engine_report,
+        environment_report,
+        environment,
+        verdict,
+        dt,
+        step_index,
+    ):
 
-            "conservation": verdict,
-        })
+        energetics = verdict.get("explain", {}).get("field_energy", {})
+
+        # ---------- Record ----------
+        self.records.append({
+
+                "step": step_index,
+                "time": state_after.time,
+                "dt": dt,
+
+                # TRUE physics objects
+                "state_before": state_before,
+                "state_after": state_after,
+
+                # Immutable snapshots (for UI / debugging)
+                "state_before_snapshot": self._snapshot_state(state_before),
+                "state_after_snapshot": self._snapshot_state(state_after),
+
+                # Reports (verbatim)
+                "engine_report": engine_report,
+                "environment_report": environment_report,
+
+                # Physics judge
+                "conservation": verdict,
+            })
+
+    # ----------------------------------------
+    # Drift analysis
+    # ----------------------------------------
 
     def analyze_drift(self):
         momentum_drift = [0.0, 0.0, 0.0]

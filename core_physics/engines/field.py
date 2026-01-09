@@ -1,6 +1,6 @@
-
-from .base import FieldEngine, EngineEffect
-import math
+from .base import FieldEngine
+from core_physics.effects import Effect
+from core_physics.reports import EngineReport
 
 
 class GravityGradientEngine(FieldEngine):
@@ -42,18 +42,27 @@ class GravityGradientEngine(FieldEngine):
         # Momentum exchanged this step
         dp = [F_mag * dt * d for d in r_hat]
 
-        return [
+        effects = [
             # Ship gains momentum
-            EngineEffect(
+            Effect(
                 delta_p=dp,
                 channel="ship",
                 source="gravity_gradient_engine"
             ),
 
             # Field loses momentum (reaction sink)
-            EngineEffect(
+            Effect(
                 delta_p=[-x for x in dp],
                 channel="field",
                 source="gravity_gradient_engine"
             )
         ]
+
+        report = EngineReport(
+                exhaust_momentum=[0.0, 0.0, 0.0],
+                energy_drawn=0.0,
+                mass_spent=0.0,
+                field_work=0.0,
+                active=True
+            )
+        return effects, report

@@ -1,5 +1,6 @@
+import copy
 from .conservation import Conservation
-from .engines.base import EngineEffect
+from noron.auditor import detect_closed_system_fraud
 
 class Simulator:
     def __init__(self, state, engine, environment, dt=0.01, recorder=None):
@@ -13,8 +14,10 @@ class Simulator:
     def step(self, steps=1000):
         for step in range(steps):
 
+            state_before = copy.deepcopy(self.state)
+
             # 1. Engine proposes effects (list)
-            engine_effects = self.engine.step(self.state, self.environment, self.dt)
+            engine_effects, engine_report  = self.engine.step(self.state, self.environment, self.dt)
             if not isinstance(engine_effects, list):
                 engine_effects = [engine_effects]
 
@@ -22,7 +25,7 @@ class Simulator:
             field_effects = []
 
             # --- Gravity as a first-class field effect ---
-            extra_field_effects = self.environment.apply_field(self.state, self.dt)
+            extra_field_effects, environment_report = self.environment.apply_field(self.state, self.dt)
             if extra_field_effects:
                 if not isinstance(extra_field_effects, list):
                     extra_field_effects = [extra_field_effects]
@@ -89,19 +92,25 @@ class Simulator:
 
             self.state.time += self.dt
 
+            state_after = self.state
+
             # 7. Recorder observes everything
             if self.recorder:
                 self.recorder.record(
-                    self.state,
-                    engine_effects,
-                    field_effects,
+                    state_before,
+                    state_after,
+                    engine_report,
+                    environment_report,
                     self.environment,
                     verdict,
                     self.dt,
                     step
                 )
 
+                fraud_verdict = detect_closed_system_fraud(self.recorder.records[-1])
+
         return {
             "judge": {"valid": True},
-            "step": steps
+            "step": steps,
+            "fraud verdict": fraud_verdict,
         }
