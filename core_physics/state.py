@@ -59,7 +59,14 @@ class State:
 
     # Add derived potential energy without storing it
     @property
-    def potential_energy(self):
-        g = self.environment.gravity
-        return self.mass * g[1] * self.position[1]
+    def gravitational_potential_energy(self):
+        env = self.environment
+        if not env or not env.has_gravity:
+            return 0.0
+
+        r = env.distance_to_gravity_source(self.position)
+        if r == 0:
+            return 0.0
+
+        return - env.G * env.gravity_mass * self.mass / r
 

@@ -200,6 +200,11 @@ class Conservation:
         else:
             # No external conservative field involved
             energy_field_ok = True
+            """
+            later distinguish:
+                - conservative fields (gravity)
+                - non-conservative fields (EM, plasma)
+            """
             explanation["field_energy"] = {
                 "valid": True,
                 "skipped": "No external conservative field interaction"

@@ -7,7 +7,8 @@ from noron.diagnostics import (
     check_momentum_sink,
     check_energy_payment,
     check_engine_agency,
-    FraudFlags
+    FraudFlags,
+    vector_norm
 )
 
 def detect_closed_system_fraud(step_record):
@@ -59,6 +60,9 @@ def detect_closed_system_fraud(step_record):
         flags.unjustified_engine_activity = True
         reasons.append(reason)
 
+    if flags.energy_without_work:
+        verdict = "FAIL"
+        reasons.append("Field acceleration without declared field work or momentum exchange")
 
     # -----------------------------
     # Final verdict
@@ -80,3 +84,25 @@ def detect_closed_system_fraud(step_record):
         },
         "reasons": reasons,
     }
+
+
+def detect_field_fraud(step_record):
+    flags = FraudFlags()
+
+    accelerated = step_record.delta_v_magnitude > 0
+    engine_active = step_record.engine_report is not None
+
+    if accelerated and engine_active:
+        er = step_record.engine_report
+
+        paid_energy = er.field_work > 0
+        paid_momentum = (
+            hasattr(er, "field_momentum") and
+            vector_norm(er.field_momentum) > 0
+        )
+        has_exhaust = vector_norm(er.exhaust_momentum) > 0
+
+        if not (paid_energy or paid_momentum or has_exhaust):
+            flags.energy_without_work = True
+
+    return flags

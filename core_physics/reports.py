@@ -21,6 +21,7 @@ class EnvironmentReport:
     mass_exchange: float = 0.0
     field_work: float = 0.0
     source: str = "environment"
+    field_momentum = [0.0, 0.0, 0.0]
 
     def __post_init__(self):
         if self.momentum_exchange is None:

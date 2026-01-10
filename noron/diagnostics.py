@@ -89,13 +89,13 @@ def check_energy_payment(
     Conservative field work is allowed IF conservation approved it.
     """
 
-    delta_ke = (
-        state_after.kinetic_energy
-        - state_before.kinetic_energy
+    delta_mech = (
+        (state_after.kinetic_energy + state_after.gravitational_potential_energy)
+        - (state_before.kinetic_energy + state_before.gravitational_potential_energy)
     )
 
-    if abs(delta_ke) < ENERGY_EPS:
-        return False, "No significant KE change"
+    if abs(delta_mech) < ENERGY_EPS:
+        return False, "Mechanical energy conserved by field"
 
     # Engine payment
     paid = engine_report.energy_drawn
@@ -103,12 +103,19 @@ def check_energy_payment(
     # Environment energy exchange (non-field)
     if env_report:
         paid += env_report.energy_exchange
-
+    
+    if field_energy_explain and field_energy_explain.get("source") == "environment":
+        return False, 
+    
     # Field work approved by conservation?
     if field_energy_explain and field_energy_explain.get("valid", False):
         return False, "Energy paid by conservative field"
 
-    if abs(delta_ke + paid) < ENERGY_EPS:
+    # Bellow assumes:
+        # engine_drawn is negative
+        # env_exchange is negative when environment loses energy
+
+    if abs(delta_mech + paid) < ENERGY_EPS:
         return False, "Energy conserved"
 
     return True, "Kinetic energy increased without engine or field payment"
@@ -169,6 +176,13 @@ def check_engine_agency(state_before, state_after, engine_report, env_report):
     # Only care if engine claims activity
     if not engine_report.active:
         return False, "Acceleration due to environment"
+
+    if engine_report.active and engine_report.field_work != 0:
+        if not env_report:
+            return True, "Field work claimed but no environment interaction"
+    
+    if engine_report.field_work != 0 and vector_norm(env_report.momentum_exchange) < ENERGY_EPS:
+        return True, "Field work with no momentum exchange"
 
     engine_contributed  = (
         vector_norm(engine_report.exhaust_momentum) > ENERGY_EPS

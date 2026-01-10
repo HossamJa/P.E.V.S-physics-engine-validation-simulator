@@ -24,6 +24,9 @@ class Environment:
 
         self.field_momentum = [0.0, 0.0, 0.0]
 
+        self.field_momentum_ledger = [0.0, 0.0, 0.0]
+        self.field_energy_ledger = 0.0
+
     # -----------------------------------
     # Geometry helpers (USED BY CONSERVATION)
     # -----------------------------------
@@ -55,6 +58,12 @@ class Environment:
     def absorb_field_effect(self, effect):
         for i in range(3):
             self.field_momentum[i] += effect.delta_p[i]
+    
+    def absorb_field_momentum(self, dp):
+        self.field_momentum_ledger += dp
+
+    def absorb_field_energy(self, dE):
+        self.field_energy_ledger += dE
 
     # -----------------------------------
     # Field application (momentum only)
@@ -62,13 +71,13 @@ class Environment:
 
     def apply_field(self, state, dt):
         if not state.can_exchange_fields or not self.has_gravity:
-            return []
+            return [], None
 
         m = state.mass
         r = self.distance_to_gravity_source(state.position)
 
         if r == 0:
-            return []
+            return [], None
 
         # Newtonian gravity force magnitude
         F = self.G * self.gravity_mass * m / (r * r)
@@ -85,8 +94,11 @@ class Environment:
                 )
 
         # ---- ENERGY ACCOUNTING ----
-        work = sum(F * direction[i] * (state.velocity[i] * dt) for i in range(3))
-        
+        work = sum(
+            (F * direction[i]) * (state.velocity[i] * dt)
+            for i in range(3)
+        )
+
         report = EnvironmentReport(
             momentum_exchange=delta_p,
             energy_exchange=-work,   # environment LOSES energy
