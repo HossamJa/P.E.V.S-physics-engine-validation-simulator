@@ -50,6 +50,9 @@ class ReactionEngine(BaseEngine):
             energy_drawn=de,
             mass_spent=dm,
             field_work=0.0,
+            exhaust_energy=de,
+            source="reaction_engine",
+            channel="ship",
             active=True
         )
 

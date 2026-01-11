@@ -42,6 +42,11 @@ class GravityGradientEngine(FieldEngine):
         # Momentum exchanged this step
         dp = [F_mag * dt * d for d in r_hat]
 
+        # --- Work done by field ---
+        v = state.velocity
+        F_vec = [F_mag * d for d in r_hat]
+        field_work = sum(F_vec[i] * v[i] for i in range(3)) * dt
+
         effects = [
             # Ship gains momentum
             Effect(
@@ -62,7 +67,9 @@ class GravityGradientEngine(FieldEngine):
                 exhaust_momentum=[0.0, 0.0, 0.0],
                 energy_drawn=0.0,
                 mass_spent=0.0,
-                field_work=0.0,
+                field_work=field_work,
+                source="gravity_gradient_engine",
+                channel="field",
                 active=True
             )
         return effects, report

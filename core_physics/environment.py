@@ -103,7 +103,8 @@ class Environment:
             momentum_exchange=delta_p,
             energy_exchange=-work,   # environment LOSES energy
             field_work=work,
-            source="gravity"
+            source="gravity",
+            channel="field"
         )
 
         return effects, report

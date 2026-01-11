@@ -24,6 +24,8 @@ class DummyEngine(BaseEngine):
                     energy_drawn=0.0,
                     mass_spent=0.0,
                     field_work=0.0,
+                    channel="ship",
+                    source="engine",
                     active=False
                 )
         return effect, report

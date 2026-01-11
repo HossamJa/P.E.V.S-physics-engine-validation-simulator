@@ -44,6 +44,9 @@ class PhotonEngine(BaseEngine):
                 energy_drawn=dE,
                 mass_spent=0.0,
                 field_work=0.0,
+                radiation_engine=dE,
+                source="photon_engine",
+                channel="ship",
                 active=True
             )
         return effect, report

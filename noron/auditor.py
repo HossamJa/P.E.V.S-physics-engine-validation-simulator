@@ -1,108 +1,130 @@
 """
 Central reasoning engine.
-Determines whether a simulation step is physically legitimate
-or violates closed-system conservation laws.
+Aggregates diagnostic checks and issues verdicts.
+This module NEVER interprets physics.
 """
+
 from noron.diagnostics import (
+    FraudFlags,
+
     check_momentum_sink,
     check_energy_payment,
+    check_mass_energy_accounting,
     check_engine_agency,
-    FraudFlags,
-    vector_norm
+
+    check_impulse_consistency,
+    check_velocity_energy_consistency,
+    check_work_energy_balance,
+    check_relativistic_warning,
 )
 
 def detect_closed_system_fraud(step_record):
     flags = FraudFlags()
     reasons = []
 
-    # --- Required inputs ---
+    # -----------------------------
+    # Required inputs
+    # -----------------------------
     sb = step_record["state_before"]
     sa = step_record["state_after"]
+    dt = step_record["dt"]
 
-    engine_report = step_record["engine_report"]
-    environment_report = step_record.get("environment_report")
-
-    # Pull conservation explanation (field work lives here)
-    conservation = step_record.get("conservation", {})
-    field_energy = conservation.get("explain", {}).get("field_energy", None)
+    engine = step_record["engine_report"]
+    env = step_record.get("environment_report")
 
     # -----------------------------
-    # Momentum fraud check
+    # Core conservation checks
     # -----------------------------
-    bad, reason = check_momentum_sink(
-        sb,
-        sa,
-        engine_report,
-        environment_report
-    )
 
+    bad, reason = check_momentum_sink(sb, sa, engine, env)
     if bad:
-        flags.momentum_without_sink = True
-        reasons.append(reason)
+        flags.add("momentum_without_sink", reason)
+
+    bad, reason = check_energy_payment(sb, sa, engine, env)
+    if bad:
+        flags.add("energy_without_work", reason)
+
+    bad, reason = check_mass_energy_accounting(sb, sa, engine, env)
+    if bad:
+        flags.add("unpaid_mass_energy", reason)
+
+    bad, reason = check_engine_agency(sb, sa, engine, env)
+    if bad:
+        flags.add("unjustified_engine_activity", reason)
 
     # -----------------------------
-    # Energy fraud check
+    # Frame sanity checks
     # -----------------------------
-    bad, reason = check_energy_payment(
-        sb,
-        sa,
-        engine_report,
-        environment_report,
-        field_energy  # critical
-    )
- 
-    if bad:
-        flags.energy_without_work = True
-        reasons.append(reason)
 
-    bad, reason = check_engine_agency(sb, sa, engine_report, environment_report)
+    bad, reason = check_impulse_consistency(sb, sa, engine, env, dt)
     if bad:
-        flags.unjustified_engine_activity = True
-        reasons.append(reason)
+        flags.add("momentum_without_sink", reason)
 
-    if flags.energy_without_work:
-        verdict = "FAIL"
-        reasons.append("Field acceleration without declared field work or momentum exchange")
+    bad, reason = check_velocity_energy_consistency(sa)
+    if bad:
+        flags.add("energy_without_work", reason)
+
+    bad, reason = check_work_energy_balance(sb, sa, engine, env)
+    if bad:
+        flags.add("energy_without_work", reason)
+
+    # -----------------------------
+    # Relativistic warning (non-fatal)
+    # -----------------------------
+
+    warn, note = check_relativistic_warning(sa)
+    if warn:
+        reasons.append(note)
 
     # -----------------------------
     # Final verdict
     # -----------------------------
-    verdict = "FAIL" if (
-        flags.momentum_without_sink
-        or flags.energy_without_work
-        or flags.unpaid_mass_energy
-        or flags.unjustified_engine_activity
-    ) else "PASS"
+
+    verdict = "FAIL" if flags.any() else "PASS"
 
     return {
         "verdict": verdict,
-        "flags": {
-            "momentum_without_sink": flags.momentum_without_sink,
-            "energy_without_work": flags.energy_without_work,
-            "unpaid_mass_energy": flags.unpaid_mass_energy,
-            "unjustified_engine_activity": flags.unjustified_engine_activity,
-        },
-        "reasons": reasons,
+        "flags": flags.flags,
+        "reasons": flags.explanations + reasons,
     }
 
 
+# --------------------------------------------------
+# Optional: Field-specific fraud detector (V2.3)
+# --------------------------------------------------
+
 def detect_field_fraud(step_record):
+    """
+    Specialized detector for illegal field propulsion.
+    Delegates logic to diagnostics via engine/environment ledgers.
+    """
+
     flags = FraudFlags()
 
-    accelerated = step_record.delta_v_magnitude > 0
-    engine_active = step_record.engine_report is not None
+    sb = step_record["state_before"]
+    sa = step_record["state_after"]
 
-    if accelerated and engine_active:
-        er = step_record.engine_report
+    engine = step_record["engine_report"]
+    env = step_record.get("environment_report")
 
-        paid_energy = er.field_work > 0
-        paid_momentum = (
-            hasattr(er, "field_momentum") and
-            vector_norm(er.field_momentum) > 0
-        )
-        has_exhaust = vector_norm(er.exhaust_momentum) > 0
+    dv = (
+        sa.velocity[0] - sb.velocity[0],
+        sa.velocity[1] - sb.velocity[1],
+        sa.velocity[2] - sb.velocity[2],
+    )
 
-        if not (paid_energy or paid_momentum or has_exhaust):
-            flags.energy_without_work = True
+    accelerated = sum(x * x for x in dv) > 0
 
-    return flags
+    if accelerated and engine.active:
+        bad, reason = check_energy_payment(sb, sa, engine, env)
+        if bad:
+            flags.add("energy_without_work", reason)
+
+        bad, reason = check_engine_agency(sb, sa, engine, env)
+        if bad:
+            flags.add("unjustified_engine_activity", reason)
+
+    return {
+        "flags": flags.flags,
+        "reasons": flags.explanations,
+    }
