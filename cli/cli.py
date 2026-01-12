@@ -13,7 +13,11 @@ from .cli_output import (
     print_conservation_summary,
     print_step_table,
     print_fraud_verdict,
-    print_step_details
+    print_step_details,
+    print_environment_summary,
+    print_momentum_accounting,
+    print_frame_sanity,
+    print_engine_compliance,
 )
 
 # -------------------------------------------------
@@ -238,6 +242,12 @@ def run_simulation(state, environment, engine, steps, dt):
     print_simulation_summary(recorder, verdict)
     print_conservation_summary(recorder)
     print_step_table(recorder)
+
+    print_environment_summary(recorder)
+    print_momentum_accounting(recorder)
+    print_frame_sanity(recorder)
+    print_engine_compliance(recorder)
+
     print_fraud_verdict(verdict["fraud verdict"])
 
     show = input("\nEnter Forensic Mode? (y/n): ").lower()
