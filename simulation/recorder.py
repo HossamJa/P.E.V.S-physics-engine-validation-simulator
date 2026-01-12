@@ -58,6 +58,9 @@ class Recorder:
                 "engine_report": engine_report,
                 "environment_report": environment_report,
 
+                "energetics": energetics,
+                # "mechanical_energy_change_due_to_field": ?
+
                 # Physics judge
                 "conservation": verdict,
             })
@@ -83,7 +86,7 @@ class Recorder:
             for i in range(3):
                 momentum_drift[i] += p[i]
 
-            mech_drifts.append(r["mechanical_energy_change_due_to_field"])
+            # mech_drifts.append(r["mechanical_energy_change_due_to_field"])
 
         return {
             "energy_drift": energy_drift,

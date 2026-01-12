@@ -90,7 +90,7 @@ def detect_closed_system_fraud(step_record):
 
 
 # --------------------------------------------------
-# Optional: Field-specific fraud detector (V2.3)
+# Field-specific fraud detector
 # --------------------------------------------------
 
 def detect_field_fraud(step_record):

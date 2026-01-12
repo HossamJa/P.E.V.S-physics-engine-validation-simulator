@@ -20,7 +20,6 @@ state = State(
     can_exchange_fields=True
 )
 
-
 engine = DummyEngine()
 recorder = Recorder()
 

@@ -41,11 +41,14 @@ class Simulator:
                 self.environment,
                 dt=self.dt
             )
+            # Auditor
+            fraud_verdict = "Detect Closed System Fraud Not Ran Yet"
 
             if not verdict["valid"]:
                 return {
                     "judge": verdict,
-                    "step": step
+                    "step": step,
+                    "fraud verdict": fraud_verdict
                 }
 
             # 5. Extract effects:
@@ -107,7 +110,7 @@ class Simulator:
                     step
                 )
 
-                fraud_verdict = detect_closed_system_fraud(self.recorder.records[-1])
+            fraud_verdict = detect_closed_system_fraud(self.recorder.records[-1])
 
         return {
             "judge": {"valid": True},
