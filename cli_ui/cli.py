@@ -73,6 +73,7 @@ def main():
         except KeyboardInterrupt:
             print("\nSee ya!")
             break
+
         environment = choose_environment()
         if not environment:
             continue
@@ -96,13 +97,16 @@ def main():
 # Environment
 # -------------------------------------------------
 
-def choose_environment():
-    print("\n--- Environment Selection ---")
-    print("[1] Deep space (no gravity)")
-    print("[2] Near Earth orbit")
-    print("[3] Custom (advanced)")
+def choose_environment(choice=None, gm=None, gpos=None, G=None, ui=False):
+    
+    # see if the it's from the flask UI or cli UI
+    if choice is None: 
+        print("\n--- Environment Selection ---")
+        print("[1] Deep space (no gravity)")
+        print("[2] Near Earth orbit")
+        print("[3] Custom (advanced)")
 
-    choice = input("Select option (1–3): ").strip()
+        choice = input("Select option (1–3): ").strip()
 
     if choice == "1":
         return Environment(
@@ -119,9 +123,10 @@ def choose_environment():
         )
 
     if choice == "3":
-        gm = ask_float("Gravity mass: ", 0)
-        gpos = ask_vector("Gravity source position (x,y,z): ")
-        G = ask_float("Gravitational constant G: ", 0)
+        if not ui:
+            gm = ask_float("Gravity mass: ", 0)
+            gpos = ask_vector("Gravity source position (x,y,z): ")
+            G = ask_float("Gravitational constant G: ", 0)
         if None in (gm, gpos, G):
             return None
         return Environment(gm, gpos, G)
@@ -134,21 +139,28 @@ def choose_environment():
 # State
 # -------------------------------------------------
 
-def define_state(environment):
-    print("\n--- Spacecraft Initial Conditions ---")
+def define_state(env, 
+                 ui=False, 
+                 position=None, 
+                 direction=None, 
+                 mass=None, 
+                 energy=None, 
+                 speed=None
+                ):
+    if not ui:
+        print("\n--- Spacecraft Initial Conditions ---")
 
-    mass = ask_float("Mass (kg): ", 0)
-    energy = ask_float("Initial energy (J): ", 0)
-    speed = ask_float("Initial speed (m/s): ", 0)
+        mass = ask_float("Mass (kg): ", 0)
+        energy = ask_float("Initial energy (J): ", 0)
+        speed = ask_float("Initial speed (m/s): ", 0)
+        direction = ask_vector("Direction (x,y,z): ")
+        position = [0.0, 6.371e6 + 400e3, 0.0]
 
-    direction = ask_vector("Direction (x,y,z): ")
     if None in (mass, energy, speed, direction):
         return None
 
     direction = normalize(direction)
     velocity = [speed * d for d in direction]
-
-    position = [0.0, 6.371e6 + 400e3, 0.0]
 
     return State(
         position=position,
@@ -156,7 +168,7 @@ def define_state(environment):
         mass=mass,
         energy=energy,
         time=0,
-        environment=environment,
+        environment=env,
         can_exchange_fields=True,
         can_exchange_mass=True,
         can_exchange_radiation=True
@@ -167,35 +179,48 @@ def define_state(environment):
 # Engine
 # -------------------------------------------------
 
-def choose_engine():
-    print("\n--- Engine Selection ---")
-    print("[1] Reaction engine")
-    print("[2] Photon engine")
-    print("[3] Field interaction engine")
-    print("[4] Reactionless claim (test)")
+def choose_engine(choice=None,
+                  exv=None,
+                  mfr=None,
+                  td=None,
+                  pwr=None,
+                  efcy=1,
+                  ui=False
+                ):
+    if not ui:
+        print("\n--- Engine Selection ---")
+        print("[1] Reaction engine")
+        print("[2] Photon engine")
+        print("[3] Field interaction engine")
+        print("[4] Reactionless claim (test)")
 
-    choice = input("Select engine (1–4): ").strip()
+        choice = input("Select engine (1–4): ").strip()
 
     if choice == "1":
-        v = ask_float("Exhaust velocity (m/s): ", 0)
-        m = ask_float("Mass flow rate (kg/s): ", 0)
-        d = ask_vector("Thrust direction (x,y,z): ")
-        if None in (v, m, d):
+        if not ui:
+            exv = ask_float("Exhaust velocity (m/s): ", 0)
+            mfr = ask_float("Mass flow rate (kg/s): ", 0)
+            td = ask_vector("Thrust direction (x,y,z): ")
+
+        if None in (exv, mfr, td):
             return None
+
         return ReactionEngine(
-            exhaust_velocity=v,
-            mass_flow_rate=m,
-            direction=normalize(d)
+            exhaust_velocity=exv,
+            mass_flow_rate=mfr,
+            direction=normalize(td)
         )
 
     if choice == "2":
-        p = ask_float("Power (W): ", 0)
-        if p is None:
+        if not ui:
+            pwr = ask_float("Power (W): ", 0)
+        
+        if pwr is None:
             return None
-        return PhotonEngine(power=p)
+        return PhotonEngine(power=pwr)
 
     if choice == "3":
-        return GravityGradientEngine()
+        return GravityGradientEngine(efficiency=efcy)
 
     if choice == "4":
         return DummyEngine()
@@ -221,9 +246,9 @@ def simulation_control():
 # Run + Output
 # -------------------------------------------------
 
-def run_simulation(state, environment, engine, steps, dt):
+def run_simulation(state, environment, engine, steps, dt, ui=False):
     recorder = Recorder()
-
+    
     sim = Simulator(
         state=state,
         environment=environment,
@@ -232,8 +257,21 @@ def run_simulation(state, environment, engine, steps, dt):
         dt=dt
     )
 
+    if ui:
+        verdict = sim.step(steps)
+        return verdict, recorder
+
     print("\nRunning simulation...\n")
     verdict = sim.step(steps)
+
+    if not recorder.records:
+        print("No simulation data available.")
+        return
+
+    print("\nNumerical notes:")
+    print("  • Residuals below ~1e-9 are considered numerical noise")
+    print("  • Integration scheme is explicit Euler")
+    print("  • Conservation is evaluated per-step and cumulatively")
 
     print("="*40)
     print(" SIMULATION VERDICT ")
@@ -249,11 +287,15 @@ def run_simulation(state, environment, engine, steps, dt):
     print_engine_compliance(recorder)
 
     print_fraud_verdict(verdict["fraud verdict"])
+    try:
+        show = input("\nEnter Forensic Mode? (y/n): ").lower()
+        if show in ("y", "yes"):
+            print("\n--- Forensic ---")
+            print_step_details(recorder.records[-1])
+    except KeyboardInterrupt:
+        print("See ya!")
 
-    show = input("\nEnter Forensic Mode? (y/n): ").lower()
-    if show in ("y", "yes"):
-        print("\n--- Forensic ---")
-        print_step_details(recorder.records[-1])
+
 
 # -------------------------------------------------
 if __name__ == "__main__":

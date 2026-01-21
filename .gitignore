@@ -5,3 +5,4 @@ __pycache__/
 *.db
 *.exe
 Documents/
+flask_session/

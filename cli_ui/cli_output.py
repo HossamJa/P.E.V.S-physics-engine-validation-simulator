@@ -124,9 +124,10 @@ def print_fraud_verdict(fraud):
 # Advanced accounting helpers
 # ============================
 
-def print_environment_summary(recorder):
+def print_environment_summary(recorder, ui=False):
     env_momentum = []
     env_energy = 0.0
+    total_env_pm = 0
 
     for r in recorder.records:
         env = r.get("environment_report")
@@ -140,15 +141,18 @@ def print_environment_summary(recorder):
             env_energy += env.energy_exchange
 
     if not env_momentum and abs(env_energy) < 1e-12:
-        return  # no environment interactions worth reporting
-
-    print(hr("ENVIRONMENT INTERACTIONS"))
+        return env_momentum, env_energy, total_env_pm # no environment interactions worth reporting
+    if not ui:
+        print(hr("ENVIRONMENT INTERACTIONS"))
 
     if env_momentum:
-        total_env_p = sum_vectors(env_momentum)
-        print("Momentum exchange:")
-        print(f"  Cumulative : {fmt_vec(total_env_p)} kg·m/s")
-
+        total_env_pm = sum_vectors(env_momentum)
+        if not ui:
+            print("Momentum exchange:")
+            print(f"  Cumulative : {fmt_vec(total_env_pm)} kg·m/s")
+    if ui:
+        return env_momentum, env_energy, total_env_pm
+    
     print("Energy exchange:")
     print(f"  Total      : {env_energy:.3e} J")
 
@@ -158,7 +162,7 @@ def print_environment_summary(recorder):
     print("  • Field interactions are conservative")
 
 
-def print_momentum_accounting(recorder):
+def print_momentum_accounting(recorder, ui=False):
     engine_p = []
     env_p = []
 
@@ -173,12 +177,15 @@ def print_momentum_accounting(recorder):
             env_p.append(env.momentum_exchange)
 
     if not engine_p and not env_p:
-        return
+        return 0, 0, 0
 
     total_engine_p = sum_vectors(engine_p) if engine_p else [0.0, 0.0, 0.0]
     total_env_p = sum_vectors(env_p) if env_p else [0.0, 0.0, 0.0]
     external_transfer = [total_engine_p[i] + total_env_p[i] for i in range(3)]
-
+    
+    if ui:
+        return total_engine_p, total_env_p, external_transfer
+    
     print(hr("MOMENTUM ACCOUNTING"))
 
     print(f"Engine contribution      : {fmt_vec(total_engine_p)} kg·m/s")
@@ -216,17 +223,16 @@ def print_engine_compliance(recorder):
 
     last = recorder.records[-1]
     eng = last.get("engine_report")
-    
+    if not eng:
+        print("No engine active.")
+        return
+
     if eng.source == "reaction_engine":
         cause = "Engine exhaust momentum"
     elif "gravity" in eng.source:
         cause = "External gravitational field"
     else:
         cause = "Field interaction"
-
-    if not eng:
-        print("No engine active.")
-        return
 
     print(f"Engine source              : {eng.source}")
     print(f"Declared momentum exchange : {'YES' if eng.exhaust_momentum is not None else 'NO'}")

@@ -70,14 +70,44 @@ class Environment:
     # -----------------------------------
 
     def apply_field(self, state, dt):
+        effects = None
+        report = None
+        explain = None
+
         if not state.can_exchange_fields or not self.has_gravity:
-            return [], None
+            effects = Effect(
+                    delta_p=None,
+                    channel="field",
+                    source="gravity"
+                )
+            report = EnvironmentReport(
+                    momentum_exchange=None,
+                    energy_exchange=None,
+                    field_work=None,
+                    source="gravity",
+                    channel="field"
+                )
+            explain = "No Field Exchange or No Gravity"
+            return [effects], report, explain
 
         m = state.mass
         r = self.distance_to_gravity_source(state.position)
 
         if r == 0:
-            return [], None
+            effects = Effect(
+                    delta_p=None,
+                    channel="field",
+                    source="gravity"
+                )
+            report = EnvironmentReport(
+                    momentum_exchange=None,
+                    energy_exchange=None,
+                    field_work=None,
+                    source="gravity",
+                    channel="field"
+                )
+            explain = "Distance to gravity source is Not Zero"
+            return [effects], report, explain
 
         # Newtonian gravity force magnitude
         F = self.G * self.gravity_mass * m / (r * r)
@@ -107,4 +137,4 @@ class Environment:
             channel="field"
         )
 
-        return effects, report
+        return [effects], report, explain

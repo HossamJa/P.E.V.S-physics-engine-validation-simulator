@@ -1,6 +1,6 @@
 import copy
 from .conservation import Conservation
-from noron.auditor import detect_closed_system_fraud
+from noron.auditor import detect_closed_system_fraud, detect_field_fraud
 
 class Simulator:
     def __init__(self, state, engine, environment, dt=0.01, recorder=None):
@@ -10,8 +10,12 @@ class Simulator:
         self.dt = dt
         self.conservation = Conservation()
         self.recorder = recorder
-
+    
     def step(self, steps=1000):
+
+        verdict = None
+        steps_executed = 0
+
         for step in range(steps):
 
             state_before = copy.deepcopy(self.state)
@@ -25,7 +29,7 @@ class Simulator:
             field_effects = []
 
             # --- Gravity as a first-class field effect ---
-            extra_field_effects, environment_report = self.environment.apply_field(self.state, self.dt)
+            extra_field_effects, environment_report, env_explain = self.environment.apply_field(self.state, self.dt)
             if extra_field_effects:
                 if not isinstance(extra_field_effects, list):
                     extra_field_effects = [extra_field_effects]
@@ -41,15 +45,10 @@ class Simulator:
                 self.environment,
                 dt=self.dt
             )
-            # Auditor
-            fraud_verdict = "Detect Closed System Fraud Not Ran Yet"
 
-            if not verdict["valid"]:
-                return {
-                    "judge": verdict,
-                    "step": step,
-                    "fraud verdict": fraud_verdict
-                }
+            # Auditor froud detection 
+            closed_system_fraud = "Not Ran Yet"
+            field_froud = "Not Ran Yet"
 
             # 5. Extract effects:
 
@@ -94,6 +93,7 @@ class Simulator:
                 self.state.position[i] += v[i] * self.dt
 
             self.state.time += self.dt
+            steps_executed += 1
 
             state_after = self.state
 
@@ -104,16 +104,28 @@ class Simulator:
                     state_after,
                     engine_report,
                     environment_report,
+                    env_explain,
                     self.environment,
                     verdict,
                     self.dt,
                     step
                 )
 
-            fraud_verdict = detect_closed_system_fraud(self.recorder.records[-1])
+            closed_system_fraud = detect_closed_system_fraud(self.recorder.records[-1])
+            field_froud = detect_field_fraud(self.recorder.records[-1])
+            
+            if not verdict["valid"]:
+                return {
+                    "judge": verdict,
+                    "steps_executed": step,
+                    "closed_system_fraud": closed_system_fraud,
+                    "field_froud": field_froud,
+                }
 
         return {
-            "judge": {"valid": True},
-            "step": steps,
-            "fraud verdict": fraud_verdict,
+            "judge": verdict,
+            "steps_executed": steps_executed,
+            "closed_system_fraud": closed_system_fraud,
+            "field_froud": field_froud,
         }
+ 

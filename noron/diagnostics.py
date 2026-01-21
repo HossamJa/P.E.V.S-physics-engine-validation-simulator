@@ -102,7 +102,7 @@ def check_energy_payment(state_before, state_after, engine, env):
     if engine.channel == "ship":
         return False, None
 
-    if engine.radiation_engine > 0 and engine.energy_drawn > 0:
+    if engine.radiation_energy > 0 and engine.energy_drawn > 0:
         return False, None
 
     # Engine internal source
@@ -262,7 +262,7 @@ def check_work_energy_balance(state_before, state_after, engine, env):
 
     paid = engine.energy_drawn
 
-    if engine.channel == "ship" or engine.radiation_engine > 0:
+    if engine.channel == "ship" or engine.radiation_energy > 0:
         return False, None
     
     # External conservative field supplies work directly

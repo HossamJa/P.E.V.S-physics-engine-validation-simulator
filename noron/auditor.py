@@ -123,8 +123,9 @@ def detect_field_fraud(step_record):
         bad, reason = check_engine_agency(sb, sa, engine, env)
         if bad:
             flags.add("unjustified_engine_activity", reason)
-
+    verdict = "FAIL" if flags.any() else "PASS"
     return {
+        "verdict": verdict,
         "flags": flags.flags,
         "reasons": flags.explanations,
     }

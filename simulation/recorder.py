@@ -19,8 +19,27 @@ class Recorder:
             "mass": state.mass,
             "stored_energy": state.energy,
             "kinetic_energy": state.kinetic_energy,
+            "potential": state.gravitational_potential_energy,
+        }
+    def _snapshot_eng_report(self, eng_report):
+        return {
+            "exhaust_momentum": eng_report.exhaust_momentum,
+            "energy_drawn": eng_report.energy_drawn,
+            "mass_spent": eng_report.mass_spent,
+            "field_work": eng_report.field_work,
+            "exhaust_energy": eng_report.exhaust_energy,
+            "radiation_energy": eng_report.radiation_energy
         }
 
+    def _snapshot_env_report(self, env_report):
+        return {
+            "momentum_exchange": env_report.momentum_exchange,
+            "energy_exchange": env_report.energy_exchange,
+            "mass_exchange": env_report.mass_exchange,
+            "field_work": env_report.field_work,
+            "field_momentum": env_report.field_momentum
+        }
+    
     # ----------------------------------------
     # Main recorder entry
     # ----------------------------------------
@@ -31,6 +50,7 @@ class Recorder:
         state_after,
         engine_report,
         environment_report,
+        env_explain,
         environment,
         verdict,
         dt,
@@ -54,11 +74,16 @@ class Recorder:
                 "state_before_snapshot": self._snapshot_state(state_before),
                 "state_after_snapshot": self._snapshot_state(state_after),
 
-                # Reports (verbatim)
+                # Reports (verbatim) objects
                 "engine_report": engine_report,
                 "environment_report": environment_report,
+                "no_env_report": env_explain,
 
-                "energetics": energetics,
+                # Reports
+                "engine_report_snapshot": self._snapshot_eng_report(engine_report),
+                "environment_report_snapshot": self._snapshot_env_report(environment_report),
+
+                "field_energy_exchange": energetics,
                 # "mechanical_energy_change_due_to_field": ?
 
                 # Physics judge

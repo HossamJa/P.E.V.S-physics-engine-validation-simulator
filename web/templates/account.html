@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Account Settings
+{% endblock %}
+
+{% block main %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body text-start d-flex align-items-center">
+                    <div class="rounded-circle bg-light p-3 me-3">
+                        <span style="font-size: 2rem;">👤</span>
+                    </div>
+                    <div>
+                        <h5 class="mb-0 fw-bold">{{user_data.username}}</h5>
+                        <p class="text-muted small mb-0">Active Account</p>
+                    </div>
+                </div>
+            </div>
+
+            {% if message.message %}
+                <div class="alert {% if 'error' in message.message.lower() %}alert-danger{% else %}alert-success{% endif %} shadow-sm" role="alert">
+                    {{message.message}}
+                </div>
+            {% endif %}
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-0 pt-4">
+                    <h4 class="fw-bold mb-0">Change Password</h4>
+                    <p class="text-muted small">Keep your account secure by updating your password regularly.</p>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    <form action="/account" method="post">
+                        <div class="mb-3 text-start">
+                            <label class="form-label small fw-bold">Current Password</label>
+                            <input class="form-control" name="current_pw" placeholder="••••••••" type="password" required>
+                        </div>
+                        
+                        <hr class="my-4 text-muted opacity-25">
+
+                        <div class="mb-3 text-start">
+                            <label class="form-label small fw-bold">New Password</label>
+                            <input class="form-control" name="new_pw" placeholder="Enter new password" type="password" required>
+                        </div>
+                        <div class="mb-4 text-start">
+                            <label class="form-label small fw-bold">Confirm New Password</label>
+                            <input class="form-control" name="confirm_pw" placeholder="Repeat new password" type="password" required>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button class="btn btn-primary btn-lg shadow-sm" type="submit">
+                                Update Password
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

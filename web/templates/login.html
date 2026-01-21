@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Log In
+{% endblock %}
+
+{% block main %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5 col-lg-4">
+            
+            <div class="text-center mb-4">
+                <h1 class="fw-bold mb-0" style="font-size: 2.5rem;">
+                    P.E.V.S
+                </h1>
+                <p class="text-muted">Welcome back! Please enter your details.</p>
+            </div>
+
+            <div class="card shadow border-0">
+                <div class="card-body p-4">
+                    <form action="/login" method="post">
+                        <div class="mb-3 text-start">
+                            <label for="username" class="form-label small fw-bold text-uppercase">Username</label>
+                            <input autocomplete="off" autofocus class="form-control" id="username" name="username" placeholder="Your username" type="text" required>
+                        </div>
+
+                        <div class="mb-4 text-start">
+                            <label for="password" class="form-label small fw-bold text-uppercase">Password</label>
+                            <input class="form-control" id="password" name="password" placeholder="••••••••" type="password" required>
+                        </div>
+
+                        <div class="d-grid">
+                            <button class="btn btn-primary btn-lg shadow-sm fw-bold" type="submit">
+                                Log In
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <p class="text-muted small">
+                    Don't have an account? 
+                    <a href="/register" class="blue fw-bold text-decoration-none">Create one now</a>
+                </p>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

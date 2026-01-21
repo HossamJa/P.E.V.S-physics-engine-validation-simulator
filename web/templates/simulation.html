@@ -1,0 +1,421 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Simulation
+{% endblock %}
+
+{% block main %}
+<div class="simulation-grid">
+
+    <!-- ========================= -->
+    <!-- SIMULATION SETUP PANEL -->
+    <!-- ========================= -->
+    <div class="sim_setup-wrapper">
+        <div class="panel-header">
+            <h2 class="panel-title">Simulation Setup</h2>
+        </div>
+
+        <div class="sim_setup" id="sim_setup">
+            <form id="simulation_form">
+
+                <!-- ENVIRONMENT -->
+                <fieldset class="environment">
+                    <legend>Environment</legend>
+
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="environment" value="1" required>
+                            Deep Space (No Gravity)
+                        </label>
+
+                        <label>
+                            <input type="radio" name="environment" value="2">
+                            Near Earth Orbit
+                        </label>
+
+                        <label>
+                            <input type="radio" name="environment" value="3">
+                            Custom
+                        </label>
+                    </div>
+                    <div class="custom-environment">
+                        <label for="gravity_mass">Gravity Mass (kg)</label>
+                        <input type="number" id="gravity_mass" name="gravity_mass" step="any">
+
+                        <label>Gravity Source Position (x, y, z)</label>
+                        <div class="vector-input">
+                            <input type="number" name="gravity_source_x" step="any" placeholder="x">
+                            <input type="number" name="gravity_source_y" step="any" placeholder="y">
+                            <input type="number" name="gravity_source_z" step="any" placeholder="z">
+                        </div>
+
+                        <label for="G" data-tooltip="Universal gravitational constant used in Newtonian gravity">
+                            Gravitational Constant G (m³·kg⁻¹·s⁻²)
+                        </label>
+                        <input type="number" id="G" name="G" step="any">
+                    </div>
+                </fieldset>
+
+                <!-- INITIAL STATE -->
+                <fieldset class="state">
+                    <legend>Spacecraft Initial Conditions</legend>
+
+                    <label>Position (x, y, z)</label>
+                    <div class="vector-input">
+                        <input type="number" name="position_x" step="any" required placeholder="x">
+                        <input type="number" name="position_y" step="any" required placeholder="y">
+                        <input type="number" name="position_z" step="any" required placeholder="z">
+                    </div>
+
+                    <label>Initial Velocity Direction (x, y, z)</label>
+                    <div class="vector-input">
+                        <input type="number" name="iv_direction_x" step="any" required placeholder="x">
+                        <input type="number" name="iv_direction_y" step="any" required placeholder="y">
+                        <input type="number" name="iv_direction_z" step="any" required placeholder="z">
+                    </div>
+
+                    <label for="mass">Mass (kg)</label>
+                    <input type="number" id="mass" name="mass" step="any" required>
+
+                    <label for="energy">Initial Energy (J)</label>
+                    <input type="number" id="energy" name="energy" step="any">
+
+                    <label>Initial Speed  (m/s)</label>
+                    <input type="number" name="speed" step="any">
+
+                </fieldset>
+
+                <!-- ENGINE -->
+                <fieldset class="engine">
+                    <legend>Engine Model</legend>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="engine_type" value="1">
+                            Reaction Engine
+                        </label>
+
+                        <div class="engine-params" id="reaction-params">
+                            <label for="exhaust_velocity">Exhaust Velocity (m/s)</label>
+                            <input type="number" id="exhaust_velocity" name="exhaust_velocity" step="any">
+
+                            <label for="mass_flow_rate"  data-tooltip="Rate at which mass is expelled from the engine">
+                                Mass Flow Rate (kg/s)
+                            </label>
+                            <input type="number" id="mass_flow_rate" name="mass_flow_rate" step="any">
+                            
+                            <label>Thrust Direction (x, y, z)</label>
+                            <div class="vector-input">
+                                <input type="number" name="thrust_direction_x" step="any" placeholder="x">
+                                <input type="number" name="thrust_direction_y" step="any" placeholder="y">
+                                <input type="number" name="thrust_direction_z" step="any" placeholder="z">
+                            </div>
+                        </div>
+
+                        <label>
+                            <input type="radio" name="engine_type" value="2">
+                            Photon Engine
+                        </label>
+
+                        <div class="engine-params" id="photon-params">
+                            <label for="power">Power (W)</label>
+                            <input type="number" id="power" name="power" step="any">
+                        </div>
+
+                        <label>
+                            <input type="radio" name="engine_type" value="3">
+                            Field Interaction Engine
+                        </label>
+
+                        <div class="engine-params" id="field-params">
+                            <label for="efficiency">Efficiency (0 – 1)</label>
+                            <input type="number" id="efficiency" name="efficiency" min="0" max="1" step="0.01">
+                        </div>
+
+                        <label>
+                            <input type="radio" name="engine_type" value="4">
+                            Reactionless Claim (Test)
+                        </label>
+                    </div>
+                </fieldset>
+
+                <!-- SIMULATION CONTROL -->
+                <fieldset class="sim_control">
+                    <legend>Simulation Control</legend>
+
+                    <label for="steps">Number of Steps</label>
+                    <input type="number" id="steps" name="steps" required>
+
+                    <label for="dt">Time Step (dt, seconds)</label>
+                    <input type="number" id="dt" name="dt" step="any" required>
+                </fieldset>
+
+                <button type="submit">Run Simulation</button>
+
+            </form>
+        </div>
+    </div>
+    
+
+    <!-- ========================= -->
+    <!-- SIMULATION RESULTS PANEL -->
+    <!-- ========================= -->
+
+    <div class="sim_results" id="sim_results">
+
+        <div class="panel-header">
+            <h2 class="panel-title">Simulation Results</h2>
+        </div>
+
+        <!-- ===================== -->
+        <!-- GLOBAL VERDICT -->
+        <!-- ===================== -->
+        <section class="result_section verdict">
+            <h3>Simulation Verdict</h3>
+                <strong>Status:</strong>
+                <span class="verdict_content" id="verdict-status"> —</span>
+                <strong>Steps Executed:</strong>
+                <span class="verdict_content" id="steps-executed"> —</span>
+                <strong>Final Time:</strong>
+                <div>
+                    <span class="verdict_content" id="final-time"> — </span> <span id="unit-seconds">s</span>
+                </div>
+        </section>
+
+        <!-- ===================== -->               
+        <!-- FRAUD & COMPLIANCE -->
+        <!-- ===================== -->
+        <section class="result_section fraud">
+            <h3>Fraud & Legality Checks</h3>
+
+            <h4><strong>Closed System Audit</strong></h4>
+            <p>Verdict: <span id="closed-system-verdict"> —</span></p>
+            <ul id="closed-system-flags"></ul>
+            <br>
+            <h4><strong>Field Interaction Audit</strong></h4>
+            <p>Verdict: <span id="field-verdict"> —</span></p>
+            <ul id="field-flags"></ul>
+        </section>
+
+        <!-- ===================== -->
+        <!-- FINAL STATE -->
+        <!-- ===================== -->
+        <section class="result_section final_state">
+            <h3>Final Spacecraft State</h3>
+            <table>
+                <tr><th>Position</th><td><span id="final-position">—</span> <small class="unit">m</small></td></tr>
+                <tr><th>Velocity</th><td><span id="final-velocity">—</span> <small class="unit">m/s</small></td></tr>
+                <tr><th>Speed</th><td><span id="final-speed">—</span> <small class="unit">m/s</small></td></tr>
+                <tr><th>Mass</th><td><span id="final-mass">—</span> <small class="unit">kg</small></td></tr>
+                <tr><th>Stored Energy</th><td><span id="final-energy">—</span> <small class="unit">J</small></td></tr>
+                <tr><th>Kinetic Energy</th><td><span id="final-ke">—</span> <small class="unit">J</small></td></tr>
+                <tr><th>Grav. Potential</th><td><span id="final-gpe">—</span> <small class="unit">J/kg</small></td></tr>
+            </table>
+        </section>
+
+        <!-- ===================== -->
+        <!-- CONSERVATION ANALYSIS -->
+        <!-- ===================== -->
+        <section class="result_section conservation">
+            <h3>Conservation Laws Analysis</h3>
+
+            <div class="law">
+                <h4>Energy Conservation</h4>
+                <div id="energy-conservation" class="explain-box"></div>
+            </div>
+
+            <div class="law">
+                <h4>Momentum Conservation</h4>
+                <div id="momentum-conservation" class="explain-box"></div>
+            </div>
+
+            <div class="law">
+                <h4>Mass Conservation</h4>
+                <div id="mass-conservation" class="explain-box"></div>
+            </div>
+
+            <div class="law">
+                <h4>Field Work–Energy Consistency</h4>
+                <div id="field-energy-conservation" class="explain-box"></div>
+            </div>
+        </section>
+
+
+        <!-- ===================== -->
+        <!-- ENGINE LEDGER -->
+        <!-- ===================== -->
+        <section class="result_section engine">
+            <h3>Engine Ledger</h3>
+            <table>
+                <tr><th>Engine Type</th><td><span id="engine-source">—</span></td></tr>
+                <tr><th>Channel</th><td><span id="engine-channel">—</span></td></tr>
+                <tr><th>Momentum Exchange</th><td><span id="engine-momentum-exchange">—</span> <small class="unit">kg·m/s</small></td></tr>
+                <tr><th>Energy Drawn</th><td><span id="engine-energy-drawn">—</span> <small class="unit">J</small></td></tr>
+                <tr><th>Mass Spent</th><td><span id="engine-mass-spent">—</span> <small class="unit">kg</small></td></tr>
+                <tr><th>Field Work</th><td><span id="engine-field-work">—</span> <small class="unit">J</small></td></tr>
+                <tr><th>Radiation Energy</th><td><span id="engine-radiation-energy">—</span> <small class="unit">J</small></td></tr>
+            </table>
+
+            <br>
+            <strong>Compliance:</strong> 
+            <div class="eng-complince-row"> 
+                <div><span class="complince-key">Momentum Declared</span><span class="complince-value" id="engine-momentum-declared">—</span></div>
+                <div><span class="complince-key">Energy Declared</span><span class="complince-value" id="engine-energy-declared">—</span></div>
+                <div><span class="complince-key">Field Work Declared</span><span class="complince-value" id="engine-field-work-declared">—</span></div>
+            </div>
+
+        </section>
+
+        <!-- ===================== -->
+        <!-- ENVIRONMENT LEDGER -->
+        <!-- ===================== -->
+        <section class="result_section environment">
+            <h3>Environment Ledger</h3>
+            <table>
+                <tr><th>Source</th><td><span id="env-source">—</span></td></tr>
+                <tr><th>Channel</th><td><span id="env-channel">—</span></td></tr>
+                <tr><th>Momentum Exchange</th><td><span id="env-momentum-exchange">—</span> <small class="unit">kg·m/s</small></td></tr>
+                <tr><th>Energy Exchange</th><td><span id="env-energy-exchange">—</span> <small class="unit">J</small></td></tr>
+                <tr><th>Mass Exchange</th><td><span id="env-mass-exchange">—</span> <small class="unit">kg</small></td></tr>
+                <tr><th>Field Work</th><td><span id="env-field-work">—</span> <small class="unit">J</small></td></tr>
+            </table>
+        </section>
+
+        <!-- ===================== -->
+        <!-- GRAPHS -->
+        <!-- ===================== -->
+        <section class="result_section graphs">
+            <h3>Time-Series Analysis</h3>
+
+            <div class="graph-box">
+                <canvas id="position-graph"></canvas>
+            </div>
+
+            <div class="graph-box">
+                <canvas id="velocity-graph"></canvas>
+            </div>
+
+            <div class="graph-box">
+                <canvas id="energy-graph"></canvas>
+            </div>
+
+            <div class="graph-box">
+                <canvas id="momentum-graph"></canvas>
+            </div>
+        </section>
+
+        <!-- ===================== -->
+        <!-- TABLES -->
+        <!-- ===================== -->        
+        <section class="step-tables">
+            <label class="global-step-limit">
+            Show last
+            <select id="step-limit">
+                <option value="50">50</option>
+                <option value="100" selected>100</option>
+                <option value="500">500</option>
+                <option value="all">All</option>
+            </select>
+            steps
+            </label> 
+
+        <!-- ===================== -->
+        <!-- STATE TABLE -->
+        <!-- ===================== -->        
+            <div class="table-box">
+                <h3>State Evolution (Per Step)</h3>
+
+                <div class="table-scroll">
+                    <table id="state-table">
+                        <thead>
+                            <tr>
+                                <th>Step</th>
+                                <th>Time (s)</th>
+                                <th>Position (x, y, z)</th>
+                                <th>Velocity (x, y, z)</th>
+                                <th>Speed (m/s)</th>
+                                <th>Mass (kg)</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- ===================== -->
+            <!-- ENERGY TABLE -->
+            <!-- ===================== -->
+            <div class="table-box">
+                <h3>Energy Accounting (Per Step)</h3>
+
+                <div class="table-scroll">
+                    <table id="energy-table">
+                        <thead>
+                            <tr>
+                                <th>Step</th>
+                                <th>Stored (J)</th>
+                                <th>Kinetic (J)</th>
+                                <th>Potential (J)</th>
+                                <th>Total (J)</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ===================== -->
+            <!-- MOMENTUM TABLE -->
+            <!-- ===================== -->
+            <div class="table-box">
+                <h3>Momentum Accounting (Per Step)</h3>
+                <div class="table-scroll">
+                    <table id="momentum-table">
+                        <thead>
+                            <tr>
+                                <th>Step</th>
+                                <th>Momentum (x, y, z)</th>
+                                <th>|p| (kg·m/s)</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ===================== -->
+            <!-- EXCHANGE TABLE -->
+            <!-- ===================== -->
+            <div class="table-box">
+                <h3>Engine / Environment Exchange</h3>
+                <div class="table-scroll">
+                    <table id="exchange-table">
+                        <thead>
+                            <tr>
+                                <th>Step</th>
+                                <th>Engine Δp</th>
+                                <th>Engine ΔE</th>
+                                <th>Engine Δm</th>
+                                <th>Env Δp</th>
+                                <th>Env ΔE</th>
+                                <th>Env Δm</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>    
+            </div>
+        </section>
+
+        <!-- ===================== -->
+        <!-- RAW DATA -->
+        <!-- ===================== -->
+        <section class="result_section raw_data">
+            <h3>Raw Simulation Records</h3>
+            <details>
+                <summary>Show Full Step Records</summary>
+                <pre id="raw-records"></pre>
+            </details>
+        </section>
+
+    </div>
+</div>
+{% endblock %}

@@ -8,15 +8,11 @@ class EngineReport:
     mass_spent: float = 0.0
     field_work: float = 0.0
     exhaust_energy: float = 0.0
-    radiation_engine: float = 0.0
+    radiation_energy: float = 0.0
     active: bool = False
 
     source: str = "engine"
     channel: str = "ship"
-
-    # optional but powerful
-    exhaust_energy: float = 0.0
-    radiation_energy: float = 0.0
 
     def __post_init__(self):
         if self.exhaust_momentum is None:
