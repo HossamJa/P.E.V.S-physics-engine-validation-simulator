@@ -1,6 +1,6 @@
 import copy
 from .conservation import Conservation
-from noron.auditor import detect_closed_system_fraud, detect_field_fraud
+from algoron.auditor import detect_closed_system_fraud, detect_field_fraud
 
 class Simulator:
     def __init__(self, state, engine, environment, dt=0.01, recorder=None):

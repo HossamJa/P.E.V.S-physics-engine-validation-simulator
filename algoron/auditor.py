@@ -4,7 +4,7 @@ Aggregates diagnostic checks and issues verdicts.
 This module NEVER interprets physics.
 """
 
-from noron.diagnostics import (
+from algoron.diagnostics import (
     FraudFlags,
 
     check_momentum_sink,

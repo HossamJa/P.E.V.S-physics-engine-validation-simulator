@@ -1,322 +1,275 @@
-## Engine Definition:
-In this Lab I define an engine as:
+# PEVS, Physics Engine Validation Simulator
 
-> **An engine is a system that converts stored energy into momentum transfer with an environment, subject to conservation laws.**
+#### Video Demo:  <>
 
-## 2.1 “System”
+## 📌 Overview
 
-This is critical for software.
+**PEVS (Physics Engine Validation Simulator)** is a physics-first simulation lab designed to **test propulsion and engine concepts against fundamental conservation laws**.
 
-* The engine is **not magic**
-* It has a boundary
-* Things cross that boundary (energy, mass, momentum)
+Rather than *designing* engines, PEVS acts as a **reality filter**:
 
-The simulation will always ask:
+> If an engine violates conservation of energy, momentum, or mass,
+> the simulator detects, explains, and rejects it.
 
-> “What crosses the system boundary?”
+This project was developed as a **CS50 Final Project**, combining:
 
----
-
-## 2.2 “Stored energy”
-
-Fuel can be:
-
-* Chemical
-* Electrical
-* Thermal
-* Field energy (parameterized)
-
-⚠️ We do **not** care *what* it is internally — only:
-
-* How much energy is available
-* How fast it can be released
-
-That’s why the engine parameters include:
-
-* `power_input`
-* `energy_density`
-* `efficiency`
+* rigorous physics modeling
+* numerical simulation
+* backend engineering
+* a full Flask web interface with persistence
 
 ---
 
-## 2.3 “Momentum transfer” (THIS IS THE KEY)
+## 🎯 Core Idea
 
-Movement does **not** come from energy alone.
+In PEVS, an **engine** is defined as:
 
-Movement comes from **momentum exchange**.
+> **A system that converts stored energy into momentum transfer with an environment, subject to conservation laws.**
 
-The engine must do **at least one** of these:
+Every simulation answers one central question:
+
+> **What crosses the system boundary?**
+
+If nothing crosses the boundary, **acceleration is impossible**.
+
+---
+
+## 🧠 Physics Principles Enforced
+
+### 1️⃣ System Boundary
+
+* Engines are **not magic**
+* They have a boundary
+* Energy, mass, or momentum must cross it
+
+### 2️⃣ Stored Energy
+
+The simulator does **not care** what the energy is internally:
+
+* chemical
+* electrical
+* thermal
+* field energy
+
+Only this matters:
+
+* how much energy exists
+* how fast it can be released
+* efficiency
+
+### 3️⃣ Momentum Transfer (Key Principle)
+
+Movement requires **momentum exchange**, not just energy.
+
+An engine must do at least one of:
 
 1. Expel mass (reaction engines)
-2. Push on an external field (field engines)
+2. Push on an external field
 3. Exchange momentum with spacetime *(speculative, constrained)*
 
-This is where **anti-gravity claims are tested**.
-
----
-
-## 2.4 “Environment”
+### 4️⃣ Environment
 
 No engine exists in isolation.
 
 The environment may provide:
 
-* Gravity
-* Fields
-* Reference frames
+* gravity
+* fields
+* reference frames
 
-If there is **nothing** to push against:
+If there is **nothing to push against**, the engine must fail.
 
-> The engine must fail.
-
-The code will enforce this.
-
----
-
-## 2.5 “Conservation laws”
-
-This is the judge, jury, and executioner.
-
-No matter how creative the idea:
+### 5️⃣ Conservation Laws (The Judge)
 
 * Energy must balance
 * Momentum must balance
 * Mass must balance
 
-This algorithm doesn’t *design* engines.
-It **filters reality**.
-
-That’s exactly what Noron does.
+PEVS does not *assume* engines are valid, it **audits them**.
 
 ---
 
-## ENGINE MODELS:
+## 🚀 Engine Models Implemented
 
-I define **three engine classes**.
+### 🔹 1. Reaction Engines (Baseline)
 
----
+**Examples**
 
-### 2.1 Reaction-Based Engine (Baseline)
+* Chemical rockets
+* Ion thrusters
+* Photon rockets
+* Nuclear thermal engines
 
-**Examples:**
-
-* Chemical Rocket
-* Ion drive
-* Mass-ejection engine
-* Ion thruster
-* Photon rocket
-* Nuclear thermal rocket
-
-**Required parameters**
-
-* Mass flow rate
-* Exhaust velocity
-* Energy source
-
-**Purpose**
-
-* Sanity baseline
-* Validation
-* Comparison
-
-
-#### What leaves the system?
-
-* **Mass and/or energy**
-
-  * Exhaust mass (gas, ions)
-  * Momentum-carrying radiation (photons, heat)
-
-#### What does it push against?
-
-* **The expelled exhaust**
-* Ultimately: **conservation of momentum within the closed system**
-* Space is *not* pushed against — the rocket pushes its own exhaust
-
-#### Governing physics
+**Physics**
 
 * Newton’s Third Law
-* Conservation of momentum
-* Conservation of energy
+* Conservation of momentum & energy
 
-### What law might it violate?
+**Verdict**
 
-✅ **None** (when correctly modeled)
-
-If performance claims exceed limits:
-
-* **Energy conservation** (if exhaust energy < kinetic gain)
-* **Relativistic limits** (near-c propulsion)
-
-📌 **Key insight:**
-A reaction engine *must* export momentum. No export → no acceleration.
+* ✅ Always valid when modeled correctly
 
 ---
 
-### 2.2 Field-Interaction Engine (Speculative but legal)
+### 🔹 2. Field-Interaction Engines (Constrained)
 
-**Examples:**
-* EM-field interaction
-* Gravitational field coupling (hypothetical)
-* Electromagnetic thrusters
-* Magnetoplasmadynamic drives,
-* Gravity-assist propulsion
+**Examples**
+
 * Solar sails
-* Sypothetical spacetime-metric engines
+* EM field propulsion
+* Gravity-assist mechanisms
+* Hypothetical spacetime metric engines
 
 **Rules**
 
-* Must exchange momentum with something
-* Must consume energy
+* Must exchange momentum with a real field
+* Must account for field energy
 
-**Purpose**
+**Verdict**
 
-* Explore edge cases
-* Show why most ideas fail
+* ⚠️ Valid *only* when field momentum is correctly modeled
 
-
-#### What leaves the system?
-
-* **Field momentum or energy**
-
-  * EM radiation
-  * Plasma interacting with external fields
-  * Stress–energy transferred into spacetime curvature (hypothetical)
-
-#### What does it push against?
-
-* **External physical fields**
-
-  * Electromagnetic fields
-  * Solar photon flux
-  * Gravitational field gradients
-  * Spacetime geometry itself (if GR-consistent)
-
-#### Governing physics
-
-* Maxwell’s equations
-* General Relativity
-* Stress–energy tensor conservation
-
-#### What law might it violate?
-
-⚠️ **Only if improperly claimed**
-
-* Momentum conservation **if the field interaction is ignored**
-* Energy conservation **if the field source is not accounted for**
-
-📌 **Key insight:**
-Fields **carry momentum**.
-If momentum flows into or out of a field, the engine is *not* reactionless.
-
-> A field-based engine is still a reaction engine — the reaction just isn’t obvious.
+> Fields carry momentum.
+> A field engine is still a reaction engine, the reaction is just less obvious.
 
 ---
 
-### 2.3 Reactionless Claim Engine (Test subject)
+### 🔹 3. Reactionless Claim Engines (Test Subjects)
 
-**Examples:**
+**Examples**
 
 * EM-drive-like claims
-* Inertial mass manipulation without exchange
-* Internal oscillating mass drives
-* “Anti-gravity” devices
+* Internal oscillating mass devices
+* “Anti-gravity” engines with no exchange
 
 **Behavior**
 
 * Automatically audited
-* Energy & momentum checked
-* Almost always rejected
+* Conservation laws enforced strictly
 
-#### What leaves the system?
+**Verdict**
 
-🚫 **Nothing** (by claim)
+* ❌ Rejected by physics
 
-* No mass expelled
-* No radiation emitted
-* No external field momentum exchange
-
-#### What does it push against?
-
-❓ **Nothing identifiable**
-
-* “The vacuum”
-* “Inertia itself”
-* “Asymmetric internal forces”
-
-#### What law might it violate?
-
-❌ **At least one fundamental law**
-
-* Conservation of momentum (primary)
-* Noether’s theorem (symmetry → conservation)
-* Conservation of energy (often indirectly)
-* Lorentz invariance (in many cases)
-
-📌 **Key insight:**
-If *nothing* leaves the system and *nothing external* is interacted with:
-
-> **Acceleration is impossible in known physics**
-
-That doesn’t mean:
-
-* It’s fake by default
-  But it **must**:
-* Reveal a hidden momentum sink
-* Or redefine what counts as “external” (vacuum ≠ nothing)
-
-# Progress:
-
-## ✅ Current Status — Honest Assessment
-
-### What I have **fully completed**
-
-I have **successfully and correctly implemented V1.5**.
-
-Let’s map this explicitly to the checklist and original vision.
-
-### ✔ V1 Core (100% DONE)
-
-* Immutable physics authority (`State`)
-* Engine interface (proposal-only)
-* Conservation as judge (not updater)
-* Simulator loop with single source of truth
-* Reaction engine passes
-* Photon / reactionless engines fail correctly
-
-This alone is already solid.
+> If nothing leaves the system and nothing external is interacted with,
+> acceleration is impossible in known physics.
 
 ---
 
-### ✔ V1.5 — Numerical Credibility (DONE, not partial)
+## 🧪 Numerical Credibility (V1.5)
 
-I now have:
+This project goes beyond a toy simulator.
 
-| Requirement                                | Status |
-| ------------------------------------------ | ------ |
-| Derived state (momentum, KE, acceleration) | ✅      |
-| Per-step recording                         | ✅      |
-| Conservation residuals (E, p, m)           | ✅      |
-| Drift detection / analysis                 | ✅      |
-| Simulator accepts enriched verdicts        | ✅      |
-| Engines judged quantitatively              | ✅      |
+It implements **numerical honesty**:
 
-That means:
+| Feature                     | Status |
+| --------------------------- | ------ |
+| Vector momentum             | ✅      |
+| Per-step state recording    | ✅      |
+| Energy / momentum residuals | ✅      |
+| Drift detection             | ✅      |
+| Stable integrator           | ✅      |
+| Quantitative verdicts       | ✅      |
 
-> The lab is now **numerically honest**.
-
-This is the line that separates “toy simulators” from **engineering-grade code**.
-
-I can **prove** that something failed, not just say it failed.
+The simulator can **prove why** something failed, not just claim it did.
 
 ---
 
-Current progress:
-✅ V1 Core — 100% COMPLETE
-✅ V1.5 Numerical Credibility — 100% COMPLETE
-✅ V2.1 Environment as physics — COMPLETE
-✅ V2.2 Field engines (constrained) — COMPLETE
-✅ V2.3 Field energy accountability / frame sanity (core) — COMPLETE
-flask UI and Database -- Complete 
+## 🧩 Architecture Overview
 
+```
+pevs/
+│
+├── core_physics/        # Physics authority (engine-agnostic)
+│   ├── state.py
+│   ├── simulator.py
+│   ├── conservation.py
+│   ├── environment.py
+│   └── engines/
+│
+├── algoron/             # Reasoning / auditing layer
+│   ├── auditor.py
+│   └── diagnostics.py
+│
+├── simulation/          # Simulation orchestration
+│
+├── web/                 # Flask application
+│   ├── app/
+│   │   ├── routes/
+│   │   ├── models/
+│   │   ├── templates/
+│   │   └── static/
+│   └── run.py
+│
+├── cli_ui/              # CLI interface
+│
+├── requirements.txt
+└── README.md
+```
+
+---
+
+## 🌐 Web Application Features
+
+* User authentication
+* Simulation creation & execution
+* Per-step result inspection
+* Conservation law analysis
+* Simulation history
+* Clean, responsive UI
+
+All simulations are **persisted** using SQLite.
+
+---
+
+## 🛠 Technologies Used
+
+* **Python**
+* **Flask**
+* **SQLAlchemy**
+* **SQLite**
+* **HTML / CSS / JavaScript**
+* **Numerical physics modeling**
+
+No machine learning, all reasoning is deterministic and explainable.
+
+---
+
+## ▶️ How to Run
+
+```bash
+pip install -r requirements.txt
+cd web
+python run.py
+```
+
+Then open:
+
+```
+http://127.0.0.1:5000
+```
+
+---
+
+## 📈 Current Project Status
+
+✅ Physics Core, complete
+✅ Numerical credibility (V1.5), complete
+✅ Environment & field engines, complete
+✅ Flask UI & database, complete
+
+The simulator is now a **closed-system physics sandbox**.
+
+---
+
+## 🔮 Future Work
+
+Planned next steps:
+
+* Rule-based reasoning engine (Algoron layer)
+* Parameter sweeps & optimization
+* Relativistic consistency warnings
+* Advanced fraud detection for closed systems
+
+---
 
