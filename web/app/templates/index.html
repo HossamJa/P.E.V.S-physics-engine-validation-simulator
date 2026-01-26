@@ -1,0 +1,159 @@
+{% extends "layout.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block main %}
+
+<!-- =========================
+   HERO SECTION
+========================= -->
+<section class="hero">
+    <div class="hero-inner">
+        <h1 class="hero-title">P.E.V.S</h1>
+        <p class="hero-subtitle">
+            Physics Engine Validation Simulator<br>
+        </p>
+        <p class="hero-description">
+            A scientific propulsion laboratory that simulates spacecraft motion
+            under strict conservation laws, audits energy and momentum flow,
+            and exposes physically invalid propulsion claims.
+        </p>
+
+        <div class="hero-actions">
+            {% if session.get("user_id") %}
+                <a href="/simulation" class="btn primary">Start a Simulation</a>
+                <a href="/history" class="btn ghost">View History</a>
+                {% else %}
+                <a href="/login" class="btn primary">Login to Begin</a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- =========================
+   ABOUT SECTION
+========================= -->
+<section class="home-section">
+    <h2>What is PEVS?</h2>
+    <p>
+        PEVS is a <strong>physics-driven simulation platform</strong> designed to test propulsion
+        concepts inside a closed, controlled virtual environment that
+        strictly obeys fundamental conservation laws.
+    </p>
+    <p>    
+        Every simulation is evaluated against fundamental conservation laws
+        to distinguish physically valid engines from impossible or fraudulent claims.
+    </p>
+    <p>
+        Every simulation is executed step-by-step, with full accounting of
+        energy, momentum, mass, and field interactions. If a concept violates
+        physics, the system does not ignore it, it flags it.
+    </p>
+</section>
+
+<!-- =========================
+   CORE PRINCIPLES
+========================= -->
+
+<section class="home-grid">
+
+    <div class="feature-card">
+        <h3>Conservation-Law Enforcement</h3>
+        <p>
+            Energy, momentum, and mass are tracked at every simulation step.
+            Violations are detected automatically with full numerical audits, quantified, and reported.
+        </p>
+    </div>
+    
+    <div class="feature-card">
+        <h3>Audit & Fraud Detection</h3>
+        <p>
+            Closed-system violations, hidden energy sources,
+            and undeclared momentum exchanges are automatically flagged.
+        </p>
+    </div>
+
+    <div class="feature-card">
+        <h3>Environment vs Engine Separation</h3>
+        <p>
+            Propulsion systems and environments are strictly separated.
+            Engines cannot secretly push against “nothing”.
+        </p>
+        <p>
+            External fields, radiation, and gravity are modeled independently
+            from engines, preventing hidden momentum or energy injection.
+        </p>
+    </div>
+
+    <div class="feature-card">
+        <h3>Reactionless Claim Detection</h3>
+        <p>
+            Engines that attempt motion without declared exchange
+            are flagged and analyzed step-by-step.
+        </p>
+        <p>
+            Reactionless and field-based engines are allowed,
+            but only if their momentum and energy exchange is physically valid.
+        </p>
+    </div>
+
+    <div class="feature-card">
+        <h3>Field Interaction Support</h3>
+        <p>
+            Legitimate field-based interactions are allowed,
+            provided their energy and momentum exchanges are explicitly conserved.
+        </p>
+    </div>
+</section>
+
+<!-- =========================
+   HOW IT WORKS
+========================= -->
+<section class="home-section">
+    <h2>How It Works</h2>
+    <ol class="guide-steps">
+        <li>Define the environment (vacuum, gravity field, external sources)</li>
+        <li>Configure the propulsion system and initial state</li>
+        <li>Run a time-resolved physics simulation</li>
+        <li>Audit conservation laws and field exchanges</li>
+        <li>Review results, drift analysis, and verdict</li>
+    </ol>
+</section>
+
+<!-- =========================
+   TARGET AUDIENCE
+========================= -->
+<section class="home-section">
+    <h2>Who is this for?</h2>
+    <p>
+        P.E.V.S is built for engineers, physics enthusiasts, researchers,
+        and curious minds who want to test ideas, 
+        not just imagine them.
+    </p>
+    <ul class="audience-list">
+        <li>Physics and aerospace students</li>
+        <li>Researchers evaluating speculative propulsion concepts</li>
+        <li>Engineers testing conservation-compliant motion models</li>
+        <li>Educators demonstrating real-world physics constraints</li>
+    </ul>
+</section>
+
+<!-- =========================
+   FOOTNOTE
+========================= -->
+<section class="home-section subtle">
+    <h2>Philosophy</h2>
+    <p>
+        “If a propulsion concept works, conservation laws will show it.
+        If it doesn’t, the simulator will.”
+    </p>
+    <p>
+        PEVS does not assume an engine is impossible.
+        It simply asks one question:
+    </p>
+    <blockquote>
+        “Where did the momentum and energy come from?”
+    </blockquote>
+</section>
+
+{% endblock %}

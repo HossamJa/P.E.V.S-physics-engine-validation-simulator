@@ -1,5 +1,9 @@
 {% extends "layout.html" %}
 
+{% block page_js %}
+<script defer src="{{ url_for('static', filename='simulation.js') }}"></script>
+{% endblock %}
+
 {% block title %}
 Simulation
 {% endblock %}
@@ -16,7 +20,7 @@ Simulation
         </div>
 
         <div class="sim_setup" id="sim_setup">
-            <form id="simulation_form">
+            <form id="simulation-form">
 
                 <!-- ENVIRONMENT -->
                 <fieldset class="environment">
@@ -25,7 +29,7 @@ Simulation
                     <div class="radio-group">
                         <label>
                             <input type="radio" name="environment" value="1" required>
-                            Deep Space (No Gravity)
+                            Vacuum (No Gravity)
                         </label>
 
                         <label>
@@ -160,7 +164,7 @@ Simulation
     <!-- SIMULATION RESULTS PANEL -->
     <!-- ========================= -->
 
-    <div class="sim_results" id="sim_results">
+    <div class="sim-results" id="sim-results">
 
         <div class="panel-header">
             <h2 class="panel-title">Simulation Results</h2>
@@ -172,12 +176,12 @@ Simulation
         <section class="result_section verdict">
             <h3>Simulation Verdict</h3>
                 <strong>Status:</strong>
-                <span class="verdict_content" id="verdict-status"> —</span>
+                <span id="verdict-status"> —</span>
                 <strong>Steps Executed:</strong>
-                <span class="verdict_content" id="steps-executed"> —</span>
+                <span id="steps-executed"> —</span>
                 <strong>Final Time:</strong>
                 <div>
-                    <span class="verdict_content" id="final-time"> — </span> <span id="unit-seconds">s</span>
+                    <span id="final-time"> — </span> <span id="unit-seconds">s</span>
                 </div>
         </section>
 
@@ -202,13 +206,13 @@ Simulation
         <section class="result_section final_state">
             <h3>Final Spacecraft State</h3>
             <table>
-                <tr><th>Position</th><td><span id="final-position">—</span> <small class="unit">m</small></td></tr>
-                <tr><th>Velocity</th><td><span id="final-velocity">—</span> <small class="unit">m/s</small></td></tr>
-                <tr><th>Speed</th><td><span id="final-speed">—</span> <small class="unit">m/s</small></td></tr>
-                <tr><th>Mass</th><td><span id="final-mass">—</span> <small class="unit">kg</small></td></tr>
-                <tr><th>Stored Energy</th><td><span id="final-energy">—</span> <small class="unit">J</small></td></tr>
-                <tr><th>Kinetic Energy</th><td><span id="final-ke">—</span> <small class="unit">J</small></td></tr>
-                <tr><th>Grav. Potential</th><td><span id="final-gpe">—</span> <small class="unit">J/kg</small></td></tr>
+                <tr><th>Position</th><td><span class="result-data" id="final-position">—</span> <small class="unit">m</small></td></tr>
+                <tr><th>Velocity</th><td><span class="result-data" id="final-velocity">—</span> <small class="unit">m/s</small></td></tr>
+                <tr><th>Speed</th><td><span class="result-data" id="final-speed">—</span> <small class="unit">m/s</small></td></tr>
+                <tr><th>Mass</th><td><span class="result-data" id="final-mass">—</span> <small class="unit">kg</small></td></tr>
+                <tr><th>Stored Energy</th><td><span class="result-data" id="final-energy">—</span> <small class="unit">J</small></td></tr>
+                <tr><th>Kinetic Energy</th><td><span class="result-data" id="final-ke">—</span> <small class="unit">J</small></td></tr>
+                <tr><th>Grav. Potential</th><td><span class="result-data" id="final-gpe">—</span> <small class="unit">J/kg</small></td></tr>
             </table>
         </section>
 
@@ -239,20 +243,19 @@ Simulation
             </div>
         </section>
 
-
         <!-- ===================== -->
         <!-- ENGINE LEDGER -->
         <!-- ===================== -->
         <section class="result_section engine">
             <h3>Engine Ledger</h3>
             <table>
-                <tr><th>Engine Type</th><td><span id="engine-source">—</span></td></tr>
-                <tr><th>Channel</th><td><span id="engine-channel">—</span></td></tr>
-                <tr><th>Momentum Exchange</th><td><span id="engine-momentum-exchange">—</span> <small class="unit">kg·m/s</small></td></tr>
-                <tr><th>Energy Drawn</th><td><span id="engine-energy-drawn">—</span> <small class="unit">J</small></td></tr>
-                <tr><th>Mass Spent</th><td><span id="engine-mass-spent">—</span> <small class="unit">kg</small></td></tr>
-                <tr><th>Field Work</th><td><span id="engine-field-work">—</span> <small class="unit">J</small></td></tr>
-                <tr><th>Radiation Energy</th><td><span id="engine-radiation-energy">—</span> <small class="unit">J</small></td></tr>
+                <tr><th>Engine Type</th><td><span class="result-data" id="engine-source">—</span></td></tr>
+                <tr><th>Channel</th><td><span class="result-data" id="engine-channel">—</span></td></tr>
+                <tr><th>Momentum Exchange</th><td><span class="result-data" id="engine-momentum-exchange">—</span> <small class="unit">kg·m/s</small></td></tr>
+                <tr><th>Energy Drawn</th><td><span class="result-data" id="engine-energy-drawn">—</span> <small class="unit">J</small></td></tr>
+                <tr><th>Mass Spent</th><td><span class="result-data" id="engine-mass-spent">—</span> <small class="unit">kg</small></td></tr>
+                <tr><th>Field Work</th><td><span class="result-data" id="engine-field-work">—</span> <small class="unit">J</small></td></tr>
+                <tr><th>Radiation Energy</th><td><span class="result-data" id="engine-radiation-energy">—</span> <small class="unit">J</small></td></tr>
             </table>
 
             <br>
@@ -271,12 +274,12 @@ Simulation
         <section class="result_section environment">
             <h3>Environment Ledger</h3>
             <table>
-                <tr><th>Source</th><td><span id="env-source">—</span></td></tr>
-                <tr><th>Channel</th><td><span id="env-channel">—</span></td></tr>
-                <tr><th>Momentum Exchange</th><td><span id="env-momentum-exchange">—</span> <small class="unit">kg·m/s</small></td></tr>
-                <tr><th>Energy Exchange</th><td><span id="env-energy-exchange">—</span> <small class="unit">J</small></td></tr>
-                <tr><th>Mass Exchange</th><td><span id="env-mass-exchange">—</span> <small class="unit">kg</small></td></tr>
-                <tr><th>Field Work</th><td><span id="env-field-work">—</span> <small class="unit">J</small></td></tr>
+                <tr><th>Source</th><td><span class="result-data" id="env-source">—</span></td></tr>
+                <tr><th>Channel</th><td><span class="result-data" id="env-channel">—</span></td></tr>
+                <tr><th>Momentum Exchange</th><td><span class="result-data" id="env-momentum-exchange">—</span> <small class="unit">kg·m/s</small></td></tr>
+                <tr><th>Energy Exchange</th><td><span class="result-data" id="env-energy-exchange">—</span> <small class="unit">J</small></td></tr>
+                <tr><th>Mass Exchange</th><td><span class="result-data" id="env-mass-exchange">—</span> <small class="unit">kg</small></td></tr>
+                <tr><th>Field Work</th><td><span class="result-data" id="env-field-work">—</span> <small class="unit">J</small></td></tr>
             </table>
         </section>
 
@@ -409,7 +412,15 @@ Simulation
         <!-- RAW DATA -->
         <!-- ===================== -->
         <section class="result_section raw_data">
-            <h3>Raw Simulation Records</h3>
+            <div class="raw-header">
+                <h3>Raw Simulation Records</h3>
+
+                <div class="raw-actions">
+                    <button id="copy-raw">Copy</button>
+                    <button id="export-raw">Export JSON</button>
+                </div>
+            </div>
+
             <details>
                 <summary>Show Full Step Records</summary>
                 <pre id="raw-records"></pre>

@@ -1,0 +1,130 @@
+{% extends "layout.html" %}
+
+{% block title %}About{% endblock %}
+
+{% block main %}
+
+<section class="about-hero">
+    <h1>About PEVS</h1>
+    <p>
+        A physics-governed virtual laboratory for validating propulsion concepts
+        under real conservation laws.
+    </p>
+</section>
+
+<section class="about-section">
+    <h2>What is PEVS?</h2>
+    <p>
+        <strong>P.E.V.S (Physics Engine Validation Simulator)</strong> is a virtual
+        propulsion laboratory designed to simulate spacecraft motion while strictly
+        enforcing fundamental physical laws.
+    </p>
+    <p>
+        Unlike traditional simulations that focus only on kinematics or visual motion,
+        PEVS treats physics as a first-class constraint. Every engine, environment, and
+        interaction must explicitly account for energy, momentum, and mass exchange.
+    </p>
+</section>
+
+<section class="about-section">
+    <h2>Why This Project Exists</h2>
+    <p>
+        The internet is filled with propulsion concepts that claim thrust without
+        reaction mass, motion without force exchange, or energy extraction from nowhere.
+        Many of these ideas are presented with convincing animations but lack physical
+        accountability.
+    </p>
+    <p>
+        PEVS exists to answer a single, non-negotiable question:
+    </p>
+
+    <blockquote>
+        “If the system moved, what did it push against?”
+    </blockquote>
+</section>
+
+<section class="about-section">
+    <h2>Core Design Principles</h2>
+
+    <div class="principles-grid">
+        <div class="principle">
+            <h3>Conservation First</h3>
+            <p>
+                Energy, momentum, and mass are tracked continuously.
+                Any unexplained drift is flagged automatically.
+            </p>
+        </div>
+
+        <div class="principle">
+            <h3>Closed-System Discipline</h3>
+            <p>
+                Engines cannot secretly interact with the environment.
+                All external fields must be explicitly defined.
+            </p>
+        </div>
+
+        <div class="principle">
+            <h3>Engine–Environment Separation</h3>
+            <p>
+                Engines generate interactions. Environments respond.
+                The two are modeled independently to prevent hidden coupling.
+            </p>
+        </div>
+
+        <div class="principle">
+            <h3>No Assumptions of Impossibility</h3>
+            <p>
+                PEVS does not declare an engine impossible by design.
+                It only evaluates whether the math remains consistent.
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="about-section">
+    <h2>How the Simulation Works (High Level)</h2>
+    <ol class="about-list">
+        <li>User defines an engine model and environment</li>
+        <li>The system evolves step-by-step using numerical integration</li>
+        <li>All forces, fields, and reactions are logged</li>
+        <li>Conservation laws are audited continuously</li>
+        <li>A verdict is generated based on physical consistency</li>
+    </ol>
+</section>
+
+<section class="about-section warning">
+    <h2>What PEVS Does Not Claim</h2>
+    <ul class="about-list">
+        <li>It does not prove real-world feasibility</li>
+        <li>It does not replace experimental validation</li>
+        <li>It does not assume speculative physics is correct</li>
+        <li>It does not allow violations of conservation laws</li>
+    </ul>
+</section>
+
+<section class="about-section">
+    <h2>Project Scope</h2>
+    <p>
+        This project was developed as a final project for
+        <strong>CS50X: Introduction to Computer Science</strong>,
+        and is designed to be extended beyond the course.
+    </p>
+    <p>
+        The long-term vision is to evolve PEVS into a modular,
+        extensible physics validation platform for education,
+        research, and speculative-engine analysis.
+    </p>
+</section>
+
+<section class="about-section author">
+    <h2>Author</h2>
+    <p>
+        Designed and developed by <strong>Hossam Jamjama</strong>.
+    </p>
+    <p class="author-note">
+        This project represents an intersection of physics curiosity,
+        software engineering, and scientific skepticism.
+    </p>
+</section>
+
+{% endblock %}

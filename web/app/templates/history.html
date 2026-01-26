@@ -1,0 +1,60 @@
+{% extends "layout.html" %}
+
+{% block page_js %}
+<script defer src="{{ url_for('static', filename='history.js') }}"></script>
+{% endblock %}
+
+{% block title %}History{% endblock %}
+
+{% block main %}
+<div class="page-header">
+    <h1 class="page-title">Simulation History</h1>
+    <p class="page-subtitle">
+        Scientific experiment log & conservation validation ledger
+    </p>
+</div>
+<div id="history-section">
+    <section class="history-controls">
+        <select id="filter-verdict">
+            <option value="">All Verdicts</option>
+            <option value="PASS">PASS</option>
+            <option value="FAIL">FAIL</option>
+        </select>
+
+        <select id="filter-engine">
+            <option value="">All Engines</option>
+            <option value="Reaction">Reaction</option>
+            <option value="Photon">Photon</option>
+            <option value="Field">Field</option>
+            <option value="Reactionless">Reactionless</option>
+        </select>
+
+        <select id="filter-env">
+            <option value="">All Environments</option>
+            <option value="Space">Space</option>
+            <option value="Orbit">Orbit</option>
+            <option value="Custom">Custom</option>
+        </select>
+    </section>
+
+    <section class="history-table-wrapper">
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col">Engine</th>
+                    <th scope="col">Environment</th>
+                    <th scope="col">Steps</th>
+                    <th scope="col">Final Time</th>
+                    <th scope="col">Verdict</th>
+                    <th scope="col">Energy Drift</th>
+                    <th scope="col">Momentum Drift</th>
+                    <th scope="col">Audit</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody id="history-body"></tbody>
+        </table>
+    </section>
+</div>
+{% endblock %}

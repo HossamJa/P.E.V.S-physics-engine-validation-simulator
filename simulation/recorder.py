@@ -104,10 +104,10 @@ class Recorder:
         for r in self.records:
             res = r["conservation"]
 
-            energy_drift += res.get("energy_residual", 0.0)
-            mass_drift += res.get("mass_residual", 0.0)
+            energy_drift += res.get("energy_residual")
+            mass_drift += res.get("mass_residual")
 
-            p = res.get("momentum_residual", [0.0, 0.0, 0.0])
+            p = res.get("momentum_residual")
             for i in range(3):
                 momentum_drift[i] += p[i]
 

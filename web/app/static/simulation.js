@@ -1,11 +1,126 @@
-document.addEventListener("DOMContentLoaded", () => {
+/* =========================
+   SIMULATION PAGE
+========================= */
+
+async function rerun_sim(form) {
+
+    /* To rerun simulation from history */
+    function getQueryParam(name) {
+        return new URLSearchParams(window.location.search).get(name);
+    }
+    async function loadRerunSetup(simId) {
+        const res = await fetch(`/api/simulation/rerun/${simId}`);
+        if (!res.ok) {
+            alert("Failed to load simulation setup.");
+            return;
+        }
+
+        const setup = await res.json();
+
+        populateSimulationForm(setup);
+    }
+
+    const rerunId = getQueryParam("rerun");
+
+    /* Auto Submit */
+    if (rerunId) {
+        await loadRerunSetup(rerunId);
+        setTimeout(() => {
+            form.requestSubmit();
+        }, 300);;
+        return;
+    }
+
+    /* Functions for Reruning the Simulations From History */
+
+    function populateSimulationForm(params) {
+
+        /* ======================
+        ENVIRONMENT (RADIO)
+        ====================== */
+
+        document
+            .querySelector(`input[name="environment"][value="${params.env_type}"]`)
+            ?.click();
+
+        /* ======================
+        ENGINE (RADIO)
+        ====================== */
+
+        document
+            .querySelector(`input[name="engine_type"][value="${params.eng_type}"]`)
+            ?.click();
+
+        /* ======================
+        TIME CONTROL
+        ====================== */
+        document.getElementById("dt").value = params.setup.dt;
+        document.getElementById("steps").value = params.setup.steps;
+
+        /* ======================
+        MASS / ENERGY
+        ====================== */
+        document.getElementById("mass").value = params.setup.mass;
+        document.getElementById("energy").value = params.setup.energy;
+
+        /* ======================
+        POSITION
+        ====================== */
+        document.querySelector("[name='position_x']").value = params.setup.position_x;
+        document.querySelector("[name='position_y']").value = params.setup.position_y;
+        document.querySelector("[name='position_z']").value = params.setup.position_z;
+
+        /* ======================
+        VELOCITY
+        ====================== */
+        document.querySelector("[name='iv_direction_x']").value = params.setup.iv_direction_x;
+        document.querySelector("[name='iv_direction_y']").value = params.setup.iv_direction_y;
+        document.querySelector("[name='iv_direction_z']").value = params.setup.iv_direction_z;
+
+        /* Initial speed */
+        document.querySelector("[name='speed']").value = params.setup.speed;
+
+        /* ======================
+        ENGINE PARAMS
+        ====================== */
+        if (params.eng_type === "1") {
+            document.getElementById("exhaust_velocity").value = params.setup.exhaust_velocity;
+            document.getElementById("mass_flow_rate").value = params.setup.mass_flow_rate;
+
+            document.querySelector("[name='thrust_direction_x']").value = params.setup.thrust_direction_x;
+            document.querySelector("[name='thrust_direction_y']").value = params.setup.thrust_direction_y;
+            document.querySelector("[name='thrust_direction_z']").value = params.setup.thrust_direction_z;
+        }
+
+        if (params.eng_type === "2") {
+            document.getElementById("power").value = params.setup.power;
+        }
+
+        if (params.eng_type === "3") {
+            document.getElementById("efficiency").value = params.setup.efficiency;
+        }
+
+        /* ======================
+        CUSTOM ENV
+        ====================== */
+        if (params.env_type === "3") {
+            document.getElementById("gravity_mass").value = params.setup.gravity_mass;
+            document.getElementById("G").value = params.setup.G;
+
+            document.querySelector("[name='gravity_source_x']").value = params.setup.gravity_source_x;
+            document.querySelector("[name='gravity_source_y']").value = params.setup.gravity_source_y;
+            document.querySelector("[name='gravity_source_z']").value = params.setup.gravity_source_z;
+        }
+    }
+}
+
+function initSimulationPage() {
 
     /* =====================================================
        FORM LOGIC
     ===================================================== */
-    const form = document.getElementById("simulation_form");
+    const form = document.getElementById("simulation-form");
     const submitBtn = form.querySelector("button[type='submit']");
-    const resultsPanel = document.getElementById("sim_results");
 
     const engineRadios = document.querySelectorAll("input[name='engine_type']");
     const engineParams = document.querySelectorAll(".engine-params");
@@ -20,6 +135,8 @@ document.addEventListener("DOMContentLoaded", () => {
         "2": "photon-params",
         "3": "field-params"
     };
+
+    rerun_sim(form);
 
     function resetEngineParams() {
         engineParams.forEach(div => {
@@ -56,8 +173,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
             }
 
-            if (radio.value === "2") {
+            if (radio.value === "3") {
                 document.getElementById("G").value = 6.6743e-11;
+                document.getElementById("gravity_mass").value = 5.972e24;
             }
 
             validateForm();
@@ -158,8 +276,10 @@ document.addEventListener("DOMContentLoaded", () => {
         renderExchangeTable(data.reports, start);
 
         /* --- Raw --- */
-        document.getElementById("raw-records").textContent =
-            JSON.stringify(data.raw_data, null, 2);
+        const rawEl = document.getElementById("raw-records");
+
+        rawEl.textContent = JSON.stringify(data.raw_data, null, 2);
+        enableScopedSelectAll(rawEl);
 
     }
 
@@ -446,4 +566,47 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    function enableScopedSelectAll(preEl) {
+        preEl.setAttribute("tabindex", "0"); // make focusable
+
+        preEl.addEventListener("keydown", (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === "a") {
+                e.preventDefault();
+
+                const range = document.createRange();
+                range.selectNodeContents(preEl);
+
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(range);
+            }
+        });
+    }
+}
+
+document.getElementById("copy-raw").addEventListener("click", async () => {
+    const text = document.getElementById("raw-records").textContent;
+
+    try {
+        await navigator.clipboard.writeText(text);
+        alert("Raw data copied to clipboard");
+    } catch {
+        alert("Copy failed");
+    }
+});
+
+document.getElementById("export-raw").addEventListener("click", () => {
+    const data = document.getElementById("raw-records").textContent;
+
+    const blob = new Blob([data], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "simulation_raw_data.json";
+    document.body.appendChild(a);
+    a.click();
+
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 });

@@ -1,0 +1,91 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Dashboard
+{% endblock %}
+
+{% block main %}
+
+<section class="dashboard-hero">
+    <h1>
+        Welcome back,
+        <span class="accent">{{ user_data.username }}</span>
+    </h1>
+    <p class="dashboard-subtitle">
+        Physics Engine Validation System — personal control panel
+    </p>
+</section>
+
+<section class="dashboard-grid">
+
+    <!-- Quick Actions -->
+    <div class="dashboard-card">
+        <h3>Quick Actions</h3>
+
+        <div class="action-list">
+            <a href="/simulation" class="action-btn primary">
+                Start New Simulation
+            </a>
+
+            <a href="/history" class="action-btn">
+                View Simulation History
+            </a>
+        </div>
+    </div>
+
+    <!-- System Overview -->
+    <div class="dashboard-card">
+        <h3>System Overview</h3>
+
+        <ul class="overview-list">
+            <li>
+                <span class="key">Simulation Engine</span>
+                <span class="value">Active</span>
+            </li>
+            <li>
+                <span class="key">Conservation Auditor</span>
+                <span class="value ok">Enabled</span>
+            </li>
+            <li>
+                <span class="key">Physics Mode</span>
+                <span class="value">Deterministic</span>
+            </li>
+        </ul>
+    </div>
+
+    <!-- What is PEVS -->
+    <div class="dashboard-card span-2">
+        <h3>What is PEVS?</h3>
+
+        <p>
+            PEVS is a physics-driven virtual propulsion laboratory designed to
+            evaluate propulsion concepts under strict conservation laws.
+        </p>
+
+        <p>
+            Every simulation is numerically integrated, audited for
+            energy and momentum conservation, and automatically classified
+            as physically valid or invalid.
+        </p>
+
+        <p class="muted">
+            Reactionless propulsion claims are treated as test subjects,
+            not assumptions.
+        </p>
+    </div>
+
+    <!-- Next Steps -->
+    <div class="dashboard-card span-2">
+        <h3>Suggested Next Steps</h3>
+
+        <ul class="next-steps">
+            <li>Run a baseline reaction engine in vacuum</li>
+            <li>Compare field-interaction vs reaction engines</li>
+            <li>Inspect conservation drift in failed simulations</li>
+            <li>Use history to rerun and refine setups</li>
+        </ul>
+    </div>
+
+</section>
+
+{% endblock %}
